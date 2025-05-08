@@ -372,7 +372,6 @@
         <module>ruoyi-common</module>
         <module>ruoyi-extend</module>
         <module>ruoyi-modules</module>
-        <module>ruoyi-modules/rouyi-business</module>
     </modules>
     <packaging>pom</packaging>
 
