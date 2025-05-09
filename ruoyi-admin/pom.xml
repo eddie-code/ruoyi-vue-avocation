@@ -116,6 +116,12 @@
 <!--            <version>${与你的agent探针版本保持一致}</version>-->
 <!--        </dependency>-->
 
+        <!--  demo模块  -->
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-business</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
