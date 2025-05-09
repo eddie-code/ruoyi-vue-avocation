@@ -1,4 +1,4 @@
-package org.dromara.business;
+package org.dromara.business.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @GetMapping("/hello")
-    private String hello() {
+    public String hello() {
         return "Hello World!";
     }
 
