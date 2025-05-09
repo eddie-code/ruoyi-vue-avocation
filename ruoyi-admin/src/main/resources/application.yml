@@ -86,6 +86,11 @@ spring:
     deserialization:
       # 允许对象忽略json中不存在的属性
       fail_on_unknown_properties: false
+  # idea实现热部署
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
 
 # Sa-Token配置
 sa-token:
@@ -268,7 +273,7 @@ websocket:
 --- # warm-flow工作流配置
 warm-flow:
   # 是否开启工作流，默认true
-  enabled: true
+  enabled: false
   # 是否开启设计器ui
   ui: true
   # 默认Authorization，如果有多个token，用逗号分隔
