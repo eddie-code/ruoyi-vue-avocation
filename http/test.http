@@ -2,3 +2,61 @@ GET http://localhost:8080/hello
 Accept: application/json
 
 ###
+
+GET http://localhost:8080/count
+Accept: application/json
+
+###
+
+GET http://localhost:8080/query
+Content-Type: application/json
+Accept: application/json
+
+{
+    "mobile": "13800138000"
+}
+
+###
+
+GET http://localhost:8080/list?pageNum=1&pageSize=10&password=456
+Accept: application/json
+
+###
+
+GET http://localhost:8080/page?pageNum=1&pageSize=10&mobile=13800138000
+Accept: application/json
+
+###
+
+GET http://localhost:8080/1
+Accept: application/json
+
+###
+
+POST http://localhost:8080
+Content-Type: application/json
+Accept: application/json
+
+{
+    "mobile": "13700137000",
+    "password": "123456"
+}
+
+###
+
+PUT http://localhost:8080
+Content-Type: application/json
+Accept: application/json
+
+{
+    "id": 1,
+    "mobile": "13700137000",
+    "password": "654321"
+}
+
+###
+
+DELETE http://localhost:8080/1,2,3
+Accept: application/json
+
+###
