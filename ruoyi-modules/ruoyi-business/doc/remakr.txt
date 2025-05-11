@@ -1,0 +1,5 @@
+阿里云视频点播文档
+https://help.aliyun.com/zh/vod/
+
+阿里云视频点播控制台
+https://vod.console.aliyun.com/#/media/video/list

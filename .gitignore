@@ -49,3 +49,4 @@ nbdist/
 
 logs/
 .run/
+.env

@@ -51,6 +51,11 @@
         <!--工作流配置-->
         <warm-flow.version>1.6.8</warm-flow.version>
 
+        <!-- 阿里云VOD -->
+        <aliyun-java-sdk-core.version>4.5.1</aliyun-java-sdk-core.version>
+        <aliyun-sdk-oss.version>3.10.2</aliyun-sdk-oss.version>
+        <aliyun-java-sdk-vod.version>2.16.11</aliyun-java-sdk-vod.version>
+
         <!-- 插件版本 -->
         <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
         <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
@@ -368,6 +373,23 @@
                 <groupId>org.dromara</groupId>
                 <artifactId>ruoyi-business</artifactId>
                 <version>${revision}</version>
+            </dependency>
+
+            <!-- 阿里云Vod 官方示例：https://help.aliyun.com/zh/vod/developer-reference/upload-sdk-for-java?spm=a2c4g.11186623.help-menu-29932.d_4_1_6_2_0.2ff22b83mcKKud&scm=20140722.H_53406._.OR_help-T_cn~zh-V_1 -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-core</artifactId>
+                <version>${aliyun-java-sdk-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun-sdk-oss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-vod</artifactId>
+                <version>${aliyun-java-sdk-vod.version}</version>
             </dependency>
 
         </dependencies>

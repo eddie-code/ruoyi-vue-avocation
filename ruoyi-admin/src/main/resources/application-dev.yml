@@ -187,6 +187,10 @@ sms:
       signature: 您的短信签名
       sdk-app-id: 您的sdkAppId
 
+--- # vod 阿里云
+vod:
+  accessKeyId: ${ALI_VOD_ACCESS_KEY_ID:LTAI5tV5qrL}
+  accessKeySecret: ${ALI_VOD_ACCESS_KEY_SECRET:lWb9DBMjF23dJ}
 
 --- # 三方授权
 justauth:

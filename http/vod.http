@@ -1,0 +1,10 @@
+POST http://localhost:8080//web/vod/get-upload-auth
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "test123.mp4",
+    "key": "1234567890123456789"
+}
+
+###
