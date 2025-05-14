@@ -3,7 +3,7 @@
     <a-button type="primary" size="large" @click="handleClick">
       <span><UploadOutlined /> 选择者音频</span>
     </a-button>
-    <input type="file" style="display: none" ref="fileUploadCom"/>
+    <input type="file" style="display: none" ref="fileUploadCom" accept=".mp3,.wav,.m4a" />
     <p>Some contents...</p>
     <p>Some contents...</p>
     <p>Some contents...</p>
@@ -39,6 +39,6 @@ const handleClick = () => {
 
 // 使用 defineExpose 向外部暴露指定的数据和方法
 defineExpose({
-  showModal,
+  showModal
 });
 </script>
