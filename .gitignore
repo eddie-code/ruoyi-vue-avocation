@@ -50,3 +50,8 @@ nbdist/
 logs/
 .run/
 .env
+plus-ui-ts/.eslintrc-auto-import.json  # 新增这一行
+
+######################################################################
+# 新增部分
+.eslintrc-auto-import.json  # 新增这一行，确保该文件被忽略
