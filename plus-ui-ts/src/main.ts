@@ -42,6 +42,11 @@ VXETable.config({
 import { ElDialog } from 'element-plus';
 ElDialog.props.closeOnClickModal.default = false;
 
+// ant-design-vue
+// https://2x.antdv.com/components/modal-cn
+import Antd from 'ant-design-vue';
+import 'ant-design-vue/dist/reset.css';
+
 const app = createApp(App);
 
 app.use(HighLight);
@@ -51,6 +56,7 @@ app.use(store);
 app.use(i18n);
 app.use(VXETable);
 app.use(plugins);
+app.use(Antd); // 全局注册 Ant Design Vue
 // 自定义指令
 directive(app);
 

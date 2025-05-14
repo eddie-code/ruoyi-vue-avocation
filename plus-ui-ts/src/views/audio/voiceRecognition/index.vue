@@ -1,45 +1,23 @@
 <template>
-  <div class="voice-recognition">
-    <!-- 页面标题 -->
-    <h1>语音识别</h1>
-
-    <!-- 触发 Modal 的按钮 -->
-    <el-button type="primary" @click="openModal">打开语音识别对话框</el-button>
-
-    <!-- Modal 组件 -->
-    <VoiceRecognitionModal v-model="modalVisible" />
+  <div>
+    <a-button type="primary" @click="showModal">开始上传音频</a-button>
+    <FiletransUpload ref="filetransSubtitleCom"></FiletransUpload>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import VoiceRecognitionModal from './voiceRecognitionModal.vue';
+<script setup>
+import FiletransUpload from './filetrans-upload.vue';
+import { ref } from 'vue';
 
-export default defineComponent({
-  components: {
-    VoiceRecognitionModal
-  },
-  setup() {
-    // 控制 Modal 显示状态
-    const modalVisible = ref(false);
+const filetransSubtitleCom = ref();
 
-    // 打开 Modal 的方法
-    const openModal = () => {
-      console.log('Before open:', modalVisible.value);
-      modalVisible.value = true;
-      console.log('After open:', modalVisible.value);
-    };
-
-    return {
-      modalVisible,
-      openModal,
-    };
-  },
-});
+const showModal = () => {
+  console.log('Button clicked'); // 调试信息
+  if (filetransSubtitleCom.value) {
+    filetransSubtitleCom.value.showModal();
+    console.log('showModal 在 FiletransUpload 上调用'); // 调试信息
+  } else {
+    console.error('filetransSubtitleCom 未定义'); // 错误信息
+  }
+};
 </script>
-
-<style scoped>
-.voice-recognition {
-  padding: 20px;
-}
-</style>

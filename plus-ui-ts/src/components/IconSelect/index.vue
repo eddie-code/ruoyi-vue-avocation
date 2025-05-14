@@ -1,6 +1,6 @@
 <template>
   <div class="relative" :style="{ 'width': width }">
-    <el-input v-model="modelValue" readonly placeholder="点击选择图标" @click="visible = !visible">
+    <el-input v-model="modelValue" readonly placeholder="点击选择图标" @click="open = !visible">
       <template #prepend>
         <svg-icon :icon-class="modelValue" />
       </template>
@@ -8,7 +8,7 @@
 
     <el-popover shadow="none" :visible="visible" placement="bottom-end" trigger="click" :width="450">
       <template #reference>
-        <div class="cursor-pointer text-[#999] absolute right-[10px] top-0 height-[32px] leading-[32px]" @click="visible = !visible">
+        <div class="cursor-pointer text-[#999] absolute right-[10px] top-0 height-[32px] leading-[32px]" @click="open = !visible">
           <i-ep-caret-top v-show="visible"></i-ep-caret-top>
           <i-ep-caret-bottom v-show="!visible"></i-ep-caret-bottom>
         </div>
