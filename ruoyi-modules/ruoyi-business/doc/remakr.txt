@@ -3,3 +3,6 @@ https://help.aliyun.com/zh/vod/
 
 阿里云视频点播控制台
 https://vod.console.aliyun.com/#/media/video/list
+
+使用JavaScript SDK上传文件
+https://help.aliyun.com/zh/vod/developer-reference/upload-sdk-for-javascript?spm=a2c4g.11186623.help-menu-29932.d_4_1_6_1_1.3a6b485cEgJijk
