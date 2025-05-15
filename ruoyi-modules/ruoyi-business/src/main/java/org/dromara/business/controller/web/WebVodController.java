@@ -36,19 +36,23 @@ public class WebVodController {
         String title = req.getKey() + "-" + req.getName();
         // 按标题搜索 (查询同一个文件是否存在, 如果存在并且状态是正常的, 就不会上传, 如果状态非正常, 就会继续上传, 导致重覆)
         SearchMediaResponse searchMediaResponse = VodUtil.searchByTitle(title);
-        Object obj  = null;
-        if (searchMediaResponse.getTotal() > 0) {
+        Object obj = handleUploadAuth(searchMediaResponse, title, client);
+        LOGGER.info("获取上传凭证结束");
+        return R.ok(obj);
+    }
+
+    private Object handleUploadAuth(SearchMediaResponse searchMediaResponse, String title, DefaultAcsClient client) throws Exception {
+        if (searchMediaResponse.getTotal() > 0 && !searchMediaResponse.getMediaList().isEmpty()) {
             LOGGER.info("该文件已上传过 = {}", title);
             SearchMediaResponse.Media media = searchMediaResponse.getMediaList().get(0);
             String vid = media.getMediaId();
             GetMezzanineInfoResponse getMezzanineInfoResponse = VodUtil.getMezzanineInfo(vid);
             String fileUrl = getMezzanineInfoResponse.getMezzanine().getFileURL();
             // 直接返回原始地址，不带过期时间等参数
-            fileUrl = fileUrl.split("\\?")[0];
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("fileUrl", fileUrl);
-            jsonObject.put("videoId", vid);
-            obj = jsonObject;
+            if (fileUrl != null) {
+                fileUrl = fileUrl.split("\\?")[0];
+            }
+            return createJsonResponse(fileUrl, vid);
         } else {
             try {
                 CreateUploadVideoResponse videoResponse = VodUtil.createUploadVideo(client, title);
@@ -56,15 +60,22 @@ public class WebVodController {
                 authResp.setUploadAuth(videoResponse.getUploadAuth());
                 authResp.setUploadAddress(videoResponse.getUploadAddress());
                 authResp.setVideoId(videoResponse.getVideoId());
-                LOGGER.info("授权码 = {}", videoResponse.getUploadAuth());
-                LOGGER.info("地址 = {}", videoResponse.getUploadAddress());
-                LOGGER.info("videoId = {}", videoResponse.getVideoId());
-                obj = authResp;
+                LOGGER.debug("授权码 = {}", videoResponse.getUploadAuth());
+                LOGGER.debug("地址 = {}", videoResponse.getUploadAddress());
+                LOGGER.debug("videoId = {}", videoResponse.getVideoId());
+                return authResp;
             } catch (Exception e) {
                 LOGGER.error("获取上传凭证错误", e);
+                throw new RuntimeException("获取上传凭证失败", e);
             }
         }
-        LOGGER.info("获取上传凭证结束");
-        return R.ok(obj);
     }
+
+    private JSONObject createJsonResponse(String fileUrl, String videoId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("fileUrl", fileUrl);
+        jsonObject.put("videoId", videoId);
+        return jsonObject;
+    }
+
 }

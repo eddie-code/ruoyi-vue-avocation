@@ -1,4 +1,4 @@
-POST http://localhost:8080//web/vod/get-upload-auth
+POST http://localhost:8080/web/vod/get-upload-auth
 Content-Type: application/json
 Accept: application/json
 
