@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- 文件上传输入框，隐藏显示，支持上传 .mp3, .wav, .m4a 格式的文件 -->
+    <!-- 隐藏的文件输入框 -->
     <input type="file" style="display: none" ref="fileUploadCom" accept=".mp3,.wav,.m4a" @change="handleFileChange" />
   </div>
 </template>
@@ -9,22 +9,46 @@
 import { ref } from 'vue';
 import { notification } from 'ant-design-vue';
 import { getCredentials } from '@/api/audio/voiceRecognition/filetrans-upload';
-import { FileTransUploadForm } from '@/api/audio/voiceRecognition/types';
 import md5 from 'js-md5';
 
-// 文件上传输入框的引用
+/**
+ * 文件输入框DOM引用
+ */
 const fileUploadCom = ref<HTMLInputElement | null>(null);
 
-// 上传凭证、上传地址和视频ID
+/**
+ * 阿里云上传凭证信息
+ */
 let uploadAuth: string;
 let uploadAddress: string;
 let videoId: string;
 
 /**
- * 阿里云上传器实例
- * 配置了用户ID、分片大小、并行上传数量、重试次数等参数
- * 并定义了上传开始、成功、失败、进度、凭证过期等回调函数
- * https://help.aliyun.com/zh/vod/developer-reference/upload-sdk-for-javascript?spm=a2c4g.11186623.help-menu-29932.d_4_1_6_1_1.3a6b485cEgJijk#34b59711afp0q
+ * 文件上传状态（响应式）
+ */
+const filetrans = ref({
+  name: '',
+  percent: 0
+});
+
+/**
+ * 重置上传状态
+ * 1. 清空文件名和进度
+ * 2. 重置文件输入框
+ */
+const resetFileTrans = () => {
+  filetrans.value = {
+    name: '',
+    percent: 0
+  };
+  if (fileUploadCom.value) {
+    fileUploadCom.value.value = '';
+  }
+  console.log('上传状态已重置');
+};
+
+/**
+ * 阿里云VOD上传实例
  */
 const uploader = new AliyunUpload.Vod({
   //userID，必填，只需有值即可。
@@ -39,103 +63,114 @@ const uploader = new AliyunUpload.Vod({
   retryDuration: 2,
   //是否上报上传日志到视频点播，默认为true
   enableUploadProgress: true,
-  //开始上传
+
+  // 上传开始回调
   onUploadstarted(uploadInfo) {
-    console.log('文件上传开始:', uploadInfo.file.name);
+    console.log('开始上传:', uploadInfo.file.name);
     uploader.setUploadAuthAndAddress(uploadInfo, uploadAuth, uploadAddress, videoId);
   },
-  //文件上传成功
+
+  // 上传成功回调
   onUploadSucceed(uploadInfo) {
-    console.log('文件上传成功: ' + uploadInfo.file.name + ', endpoint:' + uploadInfo.endpoint + ', bucket:' + uploadInfo.bucket + ', object:' + uploadInfo.object);
     const fileUrl = uploadInfo.endpoint.replace('https://', 'https://' + uploadInfo.bucket + '.') + '/' + uploadInfo.object;
-    console.log('文件地址:', fileUrl);
+    console.log('上传成功:', fileUrl);
     emit('upload-success', fileUrl);
   },
-  //文件上传失败
+
+  // 上传失败回调
   onUploadFailed(uploadInfo, code, message) {
-    console.log('文件上传失败:', uploadInfo.file.name, 'code:', code, 'message:', message);
+    console.log('上传失败:', uploadInfo.file.name, 'code:', code, 'message:', message);
     emit('upload-failed', { code, message });
   },
-  //文件上传进度，单位：字节
+
+  // 上传进度回调
   onUploadProgress(uploadInfo, totalSize, loadedPercent) {
-    console.log('文件上传进度:', uploadInfo.file.name, 'percent:', Math.ceil(loadedPercent * 100) + '%');
+    const percent = Math.ceil(loadedPercent * 100);
+    filetrans.value.percent = percent;
+    console.log('文件上传进度:', uploadInfo.file.name, 'percent:', percent + '%');
     emit('upload-progress', loadedPercent);
   },
-  //上传凭证超时
-  onUploadTokenExpired(uploadInfo) {
-    console.log('上传凭证超时');
+
+  // 凭证过期回调
+  onUploadTokenExpired() {
+    console.log('凭证过期，尝试续期');
     uploader.resumeUploadWithAuth(uploadAuth);
   },
-  //全部文件上传结束
-  onUploadEnd(uploadInfo) {
-    console.log('文件上传结束');
-    if (fileUploadCom.value) {
-      fileUploadCom.value.value = '';
-    }
+
+  // 上传结束回调
+  onUploadEnd() {
+    console.log('上传流程结束');
+    resetFileTrans(); // 上传完成后自动重置
   }
 });
 
-// 定义事件发射器，用于通知父组件上传状态
+/**
+ * 定义组件事件
+ */
 const emit = defineEmits(['upload-success', 'upload-failed', 'upload-progress']);
 
 /**
- * 处理文件选择变化的函数
- * 检查文件是否存在，文件大小是否超过限制，获取上传凭证并开始上传
+ * 处理文件选择变化
  */
 const handleFileChange = () => {
-  if (!fileUploadCom.value || !fileUploadCom.value.files || fileUploadCom.value.files.length === 0) {
+  if (!fileUploadCom.value?.files?.length) {
     console.error('未选择文件');
     return;
   }
 
   const file = fileUploadCom.value.files[0];
-  const max = 500 * 1024 * 1024;
-  if (file.size > max) {
-    notification['warning']({
-      message: '系统提示',
-      description: '文件大小超过最大限制, 最大为500M'
+  const maxSize = 500 * 1024 * 1024; // 500MB
+
+  // 文件大小校验
+  if (file.size > maxSize) {
+    notification.warning({
+      message: '文件过大',
+      description: '最大支持500MB的文件'
     });
     return;
   }
 
-  // 使用 md5.64 生成文件的唯一标识符
-  const hash32 = md5(file.name + file.type + file.size + file.lastModified);
-  const key = hash32.substring(0, 16);
-  const params: FileTransUploadForm = { name: file.name, key: key };
+  // 更新上传状态
+  filetrans.value = {
+    name: file.name,
+    percent: 0
+  };
 
-  // 获取上传凭证并开始上传
-  getCredentials(params)
+  // 生成文件唯一标识
+  const fileHash = md5(file.name + file.type + file.size + file.lastModified);
+  const fileKey = fileHash.substring(0, 16);
+
+  // 获取上传凭证
+  getCredentials({ name: file.name, key: fileKey })
     .then((response) => {
-      if (response.code === 200) {
-        const { uploadAuth: auth, uploadAddress: address, videoId: id, fileUrl } = response.data;
-        // 根据和后端约定返回fileUrl字段：表示已经上传过的文件就返回此字段
-        if (fileUrl) {
-          console.log('文件已上传过, 地址：', fileUrl);
-          emit('upload-success', fileUrl);
-        } else {
-          console.log('获取上传凭证成功：', response.data);
-          uploadAuth = auth;
-          uploadAddress = address;
-          videoId = id;
-          // 调用阿里云的Vod SDK方法
-          uploader.addFile(file, null, null, null, null);
-          uploader.startUpload();
-        }
-      } else {
-        notification['error']({
-          message: '系统提示',
-          description: response.msg || '上传文件失败'
-        });
-        emit('upload-failed', { code: response.code, message: response.msg });
+      if (response.code !== 200) throw new Error(response.msg);
+
+      // 已上传过的文件直接返回URL
+      if (response.data.fileUrl) {
+        console.log('文件已上传过:', response.data.fileUrl);
+        filetrans.value.percent = 100;
+        emit('upload-success', response.data.fileUrl);
+        return;
       }
+
+      // 使用阿里云SDK方法新文件开始上传
+      console.log('新文件开始上传:', response.data);
+      uploadAuth = response.data.uploadAuth;
+      uploadAddress = response.data.uploadAddress;
+      videoId = response.data.videoId;
+      uploader.addFile(file);
+      uploader.startUpload();
     })
     .catch((error) => {
-      console.error('获取上传凭证失败：', error);
-      notification['error']({
-        message: '系统提示',
-        description: '获取上传凭证失败'
+      console.error('获取凭证失败:', error);
+      notification.error({
+        message: '上传失败',
+        description: error.message || '无法获取上传凭证'
       });
-      emit('upload-failed', { code: -1, message: '获取上传凭证失败' });
+      emit('upload-failed', {
+        code: -1,
+        message: error.message || '获取上传凭证失败'
+      });
     });
 };
 
@@ -144,13 +179,15 @@ const handleFileChange = () => {
  */
 const selectFile = () => {
   if (fileUploadCom.value) {
-    fileUploadCom.value.value = '';
+    fileUploadCom.value.value = ''; // 清除之前的选择
     fileUploadCom.value.click();
   }
 };
 
-// 暴露 selectFile 方法给父组件调用
+// 暴露给父组件的方法和属性
 defineExpose({
-  selectFile
+  selectFile,
+  resetFileTrans,
+  filetrans
 });
 </script>

@@ -75,3 +75,11 @@ plus-ui-ts
 ```
 
 `按照上面调用顺序： views ==> components ==> api`
+
+
+### feat(audio): 9.10 优化文件上传组件并添加上传文件进度条
+
+- 重构 FileUploader 组件，增加上传状态和进度显示
+- 新增 FileTrans 和 FileUploaderExpose 接口，用于定义上传状态和暴露的方法
+- 更新 filetrans-upload组件，集成新的上传状态显示功能
+- 优化文件上传逻辑，支持上传进度实时更新
