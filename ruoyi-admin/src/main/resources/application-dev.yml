@@ -192,6 +192,11 @@ vod:
   accessKeyId: ${ALI_VOD_ACCESS_KEY_ID:LTAI5tV5qrL}
   accessKeySecret: ${ALI_VOD_ACCESS_KEY_SECRET:lWb9DBMjF23dJ}
 
+--- # 语音识别单价：元/分
+filetrans:
+  audio:
+    price: 0.2  # 正确配置，值为 0.2
+
 --- # 三方授权
 justauth:
   # 前端外网访问地址

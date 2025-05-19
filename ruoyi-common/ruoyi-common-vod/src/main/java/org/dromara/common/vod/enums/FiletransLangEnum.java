@@ -3,6 +3,9 @@ package org.dromara.common.vod.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * 对应阿里云-智能语音交互的项目，一个项目对应一个语言
+ */
 @AllArgsConstructor
 public enum FiletransLangEnum {
 

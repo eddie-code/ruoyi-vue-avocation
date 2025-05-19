@@ -10,12 +10,14 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.vod.model.v20170321.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
+import org.dromara.common.core.enums.BusinessExceptionEnum;
 import org.dromara.common.core.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
 
 /**
  * 阿里云Vod工具类
@@ -36,6 +38,13 @@ public class VodUtil {
     @Value("${vod.accessKeySecret}")
     public void setAccessKeySecret(String accessKeySecret) {
         VodUtil.accessKeySecret = accessKeySecret;
+    }
+
+    private static BigDecimal filetransAudioPrice;
+
+    @Value("${filetrans.audio.price}")
+    public void setFiletransAudioPrice(BigDecimal filetransAudioPrice) {
+        VodUtil.filetransAudioPrice = filetransAudioPrice;
     }
 
     /**
@@ -321,5 +330,38 @@ public class VodUtil {
     private static JSONObject decodeBase64(String uploadAuth) {
         return JSONObject.parseObject(Base64.decodeBase64(uploadAuth), JSONObject.class);
     }
+
+    /**
+     * 计算音频转字幕的应收金额。
+     * 该函数根据视频的时长和单价，计算出应收金额。金额的计算公式为：时长（秒） * 单价 / 60，结果保留两位小数。
+     * 如果计算出的金额为0，则最低收取0.01元。
+     *
+     * @param videoId 视频的唯一标识符，用于获取视频信息。
+     * @return 计算出的应收金额，单位为元。
+     * @throws ServiceException 如果计算过程中发生异常，则抛出此异常，并附带错误信息。
+     */
+    public static BigDecimal calAmount(String videoId) {
+        try {
+            // 获取视频信息
+            GetVideoInfoResponse videoInfo = VodUtil.getVideoInfo(videoId);
+            // 获取视频时长
+            Float duration = videoInfo.getVideo().getDuration();
+            log.info("视频：{}，时长：{}，单价：{}", videoId, duration, filetransAudioPrice);
+
+            // 计算金额：时长（秒） * 单价 / 60，结果保留两位小数
+            BigDecimal amount = new BigDecimal(duration).multiply(filetransAudioPrice).divide(new BigDecimal("60"), 2, BigDecimal.ROUND_HALF_UP);
+
+            // 如果金额为0，则最低收取0.01元
+            if (amount.compareTo(BigDecimal.ZERO) == 0) {
+                amount = new BigDecimal("0.01");
+            }
+
+            return amount;
+        } catch (Exception e) {
+            log.error("计算音频转字幕应收金额异常", e);
+            throw new ServiceException(BusinessExceptionEnum.FILETRANS_CAL_AMOUNT_ERROR.getDesc());
+        }
+    }
+
 
 }

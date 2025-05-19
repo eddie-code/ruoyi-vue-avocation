@@ -9,14 +9,13 @@ import com.aliyuncs.vod.model.v20170321.SearchMediaResponse;
 import jakarta.validation.Valid;
 import org.dromara.business.domain.bo.GetUploadAuthBo;
 import org.dromara.business.domain.vo.GetUploadAuthVo;
-import org.dromara.common.vod.util.VodUtil;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.vod.util.VodUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 /**
  * @author lee
@@ -76,6 +75,12 @@ public class WebVodController {
         jsonObject.put("fileUrl", fileUrl);
         jsonObject.put("videoId", videoId);
         return jsonObject;
+    }
+
+    @GetMapping("/cal-amount/{videoId}")
+    public R<BigDecimal> calAmount(@PathVariable String videoId) {
+        BigDecimal amount = VodUtil.calAmount(videoId);
+        return R.ok(amount);
     }
 
 }
