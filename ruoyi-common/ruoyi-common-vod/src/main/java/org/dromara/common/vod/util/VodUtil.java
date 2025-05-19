@@ -1,4 +1,4 @@
-package org.dromara.business.util;
+package org.dromara.common.vod.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

@@ -9,7 +9,7 @@ import com.aliyuncs.vod.model.v20170321.SearchMediaResponse;
 import jakarta.validation.Valid;
 import org.dromara.business.domain.bo.GetUploadAuthBo;
 import org.dromara.business.domain.vo.GetUploadAuthVo;
-import org.dromara.business.util.VodUtil;
+import org.dromara.common.vod.util.VodUtil;
 import org.dromara.common.core.domain.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

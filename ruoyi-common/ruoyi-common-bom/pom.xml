@@ -179,6 +179,13 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- Business模块 -->
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-common-vod</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
