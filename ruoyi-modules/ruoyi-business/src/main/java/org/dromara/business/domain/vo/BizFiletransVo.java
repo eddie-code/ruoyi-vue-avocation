@@ -1,17 +1,14 @@
 package org.dromara.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.dromara.business.domain.BizFiletrans;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import org.dromara.common.excel.annotation.ExcelDictFormat;
-import org.dromara.common.excel.convert.ExcelDictConvert;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
+import org.dromara.business.domain.BizFiletrans;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -52,13 +49,13 @@ public class BizFiletransVo implements Serializable {
      * 音频文件时长|秒
      */
     @ExcelProperty(value = "音频文件时长|秒")
-    private Long second;
+    private Integer second;
 
     /**
      * 金额|元，second*单价
      */
     @ExcelProperty(value = "金额|元，second*单价")
-    private Long amount;
+    private BigDecimal amount;
 
     /**
      * 文件链接

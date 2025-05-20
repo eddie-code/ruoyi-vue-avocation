@@ -1,0 +1,20 @@
+POST http://localhost:8080/web/filetrans/pay
+Content-Type: application/json
+
+{
+  "memberId": "1",
+  "name": "1.mp3",
+  "amount": 0.11,
+  "audio": "123",
+  "fileSign": "1233211231",
+  "lang": "DJPxHbuDkSFzJSny",
+  "vod": "00af7506353571f0bfe85017f1e80102"
+}
+
+###
+
+GET http://localhost:18000/nls/web/filetrans/query?page=4&size=1
+Accept: application/json
+
+###
+

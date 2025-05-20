@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import org.dromara.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -43,12 +44,12 @@ public class BizFiletrans extends TenantEntity {
     /**
      * 音频文件时长|秒
      */
-    private Long second;
+    private Integer second;
 
     /**
      * 金额|元，second*单价
      */
-    private Long amount;
+    private BigDecimal amount;
 
     /**
      * 文件链接

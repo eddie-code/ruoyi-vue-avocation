@@ -1,15 +1,17 @@
 package org.dromara.business.domain.bo;
 
-import org.dromara.business.domain.BizFiletrans;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
-import org.dromara.common.core.validate.AddGroup;
-import org.dromara.common.core.validate.EditGroup;
 import io.github.linpeilie.annotations.AutoMapper;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.validation.constraints.*;
+import org.dromara.business.domain.BizFiletrans;
+import org.dromara.common.core.validate.AddGroup;
+import org.dromara.common.core.validate.EditGroup;
+import org.dromara.common.mybatis.core.domain.BaseEntity;
+
+import java.math.BigDecimal;
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 语音识别业务对象 biz_filetrans
@@ -43,12 +45,12 @@ public class BizFiletransBo extends BaseEntity {
     /**
      * 音频文件时长|秒
      */
-    private Long second;
+    private Integer second;
 
     /**
      * 金额|元，second*单价
      */
-    private Long amount;
+    private BigDecimal amount;
 
     /**
      * 文件链接

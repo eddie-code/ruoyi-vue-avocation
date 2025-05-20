@@ -9,12 +9,14 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum FiletransLangEnum {
 
-    LANG0("5jYCe7Ls9ziaMWNc", "普通话"),
-    LANG1("U9qIhvyLaf5kN6oX", "英语"),
-    LANG2("vIHpSICVL6C34sg1", "中英混合"),
-    LANG3("AFwLebxf7f3ZTRDV", "日语"),
-    LANG4("O4NiETbfRr4OOVzQ", "泰语"),
-    LANG5("1k2bzW12JGl1jg0X", "韩语")
+    LANG0("yNlqb7o08TopM1WZ", "普通话"),
+    LANG1("DJPxHbuDkSFzJSny", "粤语简"),
+    LANG2("PWZFkB61ZFS2ed6I", "粤语繁"),
+    LANG3("YNCu1rEWVIHpfCHU", "英语"),
+    LANG4("6iYWEDPysn3oLRVK", "中英混合"),
+    LANG5("KfhevtFDmYBxXyFm", "日语"),
+    LANG6("jCPeAOGbVSG26N5e", "泰语"),
+    LANG7("4XH2B97Dpo6kmvVB", "韩语")
     ;
 
     @Getter
