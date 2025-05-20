@@ -6,6 +6,8 @@
       <span><UploadOutlined /> 选择音频文件</span>
     </a-button>
 
+    <p></p>
+
     <!-- 更新组件事件监听 -->
     <FileUploader
       ref="fileUploader"
@@ -21,6 +23,12 @@
     <p>
       <a-progress :percent="uploadPercent" />
     </p>
+    <p>
+      音频语言：
+      <a-select v-model:value="lang" style="width: 120px">
+        <a-select-option v-for="o in FILETRANS_LANG_ARRAY" :value="o.code">{{o.desc}}</a-select-option>
+      </a-select>
+    </p>
 
     <!-- 模态框其他内容 -->
     <p>支持格式：.mp3, .wav, .m4a，最大500MB</p>
@@ -32,6 +40,7 @@ import { ref, computed } from 'vue';
 import { notification } from 'ant-design-vue';
 import FileUploader from '@/components/Alibaba/Vod/FileUploader.vue';
 import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
+
 
 // 添加金额格式化方法
 const formatAmount = (amount: string) => {
@@ -46,6 +55,9 @@ const formatAmount = (amount: string) => {
  * 控制模态框显示/隐藏的状态
  */
 const open = ref(false);
+
+const FILETRANS_LANG_ARRAY = ref(window.FILETRANS_LANG_ARRAY)
+
 
 /**
  * 文件上传组件引用（包含类型提示）
