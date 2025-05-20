@@ -9,7 +9,7 @@ Accept: application/json
 
 ###
 
-GET http://localhost:8080/web/vod/cal-amount/402e3a2e318d71f082635420848d0102
+GET http://localhost:8080/web/vod/cal-amount/00af7506353571f0bfe85017f1e80102
 Content-Type: application/json
 
 ###

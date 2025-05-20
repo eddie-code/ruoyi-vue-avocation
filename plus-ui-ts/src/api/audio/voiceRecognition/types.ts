@@ -51,3 +51,20 @@ export interface FileUploaderExpose {
    */
   filetrans: FileTrans;
 }
+
+// 扩展事件类型声明
+declare module 'vue' {
+  interface ComponentCustomProperties {
+    $emit: (
+      event: 'amount-calculated',
+      amount: string | number
+    ) => void;
+  }
+}
+
+// 新增金额计算接口响应类型
+export interface CalAmountResponse {
+  code: number;
+  msg: string;
+  data: string | number;
+}

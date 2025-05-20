@@ -10,6 +10,7 @@ import { ref } from 'vue';
 import { notification } from 'ant-design-vue';
 import { getCredentials } from '@/api/audio/voiceRecognition/filetrans-upload';
 import md5 from 'js-md5';
+import request from '@/utils/request'; // 新增引入request
 
 /**
  * 文件输入框DOM引用
@@ -75,6 +76,8 @@ const uploader = new AliyunUpload.Vod({
     const fileUrl = uploadInfo.endpoint.replace('https://', 'https://' + uploadInfo.bucket + '.') + '/' + uploadInfo.object;
     console.log('上传成功:', fileUrl);
     emit('upload-success', fileUrl);
+    // 关键修复：上传成功后再触发金额计算
+    calculateAmount(videoId); // 确保使用最新的videoId
   },
 
   // 上传失败回调
@@ -105,9 +108,38 @@ const uploader = new AliyunUpload.Vod({
 });
 
 /**
- * 定义组件事件
+ * 新增：金额计算接口
+ * @param videoId 视频ID
  */
-const emit = defineEmits(['upload-success', 'upload-failed', 'upload-progress']);
+const calculateAmount = async (videoId: string) => {
+  try {
+    const response = await request({
+      url: `/web/vod/cal-amount/${videoId}`,
+      method: 'get'
+    });
+
+    if (response.code === 200) {
+      emit('amount-calculated', response.data); // 触发金额事件
+    } else {
+      throw new Error(response.msg || '金额计算失败');
+    }
+  } catch (error: any) {
+    console.error('金额计算错误:', error);
+    notification.warning({
+      message: '费用计算失败',
+      description: error.message || '无法获取预估费用'
+    });
+    emit('amount-calculated', '0.00'); // 失败时重置金额
+  }
+};
+
+// 更新事件定义
+const emit = defineEmits([
+  'upload-success',
+  'upload-failed',
+  'upload-progress',
+  'amount-calculated' // 新增金额事件
+]);
 
 /**
  * 处理文件选择变化
@@ -150,6 +182,9 @@ const handleFileChange = () => {
         console.log('文件已上传过:', response.data.fileUrl);
         filetrans.value.percent = 100;
         emit('upload-success', response.data.fileUrl);
+        videoId = response.data.videoId; // 确保videoId更新
+        // 关键新增：立即触发预计算（可选）
+        calculateAmount(videoId);
         return;
       }
 
@@ -157,7 +192,9 @@ const handleFileChange = () => {
       console.log('新文件开始上传:', response.data);
       uploadAuth = response.data.uploadAuth;
       uploadAddress = response.data.uploadAddress;
-      videoId = response.data.videoId;
+      videoId = response.data.videoId; // 确保videoId更新
+      // 关键新增：立即触发预计算（可选）
+      calculateAmount(videoId);
       uploader.addFile(file);
       uploader.startUpload();
     })

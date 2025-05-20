@@ -13,3 +13,14 @@ export const getCredentials = (data: FileTransUploadForm) => {
     data: data
   });
 };
+
+/**
+ * 新增：计算金额接口
+ * @param videoId 视频ID
+ */
+export const calculateAmount = (videoId: string) => {
+  return request({
+    url: `/web/vod/cal-amount/${videoId}`,
+    method: 'get'
+  });
+};
