@@ -35,6 +35,7 @@
         <module>ruoyi-common-websocket</module>
         <module>ruoyi-common-sse</module>
         <module>ruoyi-common-vod</module>
+        <module>ruoyi-common-fe-enum</module>
     </modules>
 
     <artifactId>ruoyi-common</artifactId>
