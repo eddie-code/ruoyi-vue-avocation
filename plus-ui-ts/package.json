@@ -39,6 +39,7 @@
     "jsencrypt": "3.3.2",
     "nprogress": "0.2.0",
     "pinia": "2.2.6",
+    "radash": "^12.1.0",
     "screenfull": "6.0.2",
     "vue": "3.5.13",
     "vue-cropper": "1.1.1",

@@ -342,8 +342,9 @@ public class VodUtil {
      */
     public static BigDecimal calAmount(String videoId) {
         try {
+            GetVideoInfoResponse videoInfo = getVideoInfoWithRetry(videoId);
             // 获取视频信息
-            GetVideoInfoResponse videoInfo = VodUtil.getVideoInfo(videoId);
+//            GetVideoInfoResponse videoInfo = VodUtil.getVideoInfo(videoId);
             // 获取视频时长
             Float duration = videoInfo.getVideo().getDuration();
             log.info("视频：{}，时长：{}，单价：{}", videoId, duration, filetransAudioPrice);
@@ -363,5 +364,22 @@ public class VodUtil {
         }
     }
 
+    /**
+     * 带状态检查的视频信息获取
+     * <p>
+     * 解决：上传完后，马上在上传新的视频文件，导致获取不了时长问题
+     */
+    public static GetVideoInfoResponse getVideoInfoWithRetry(String videoId) throws Exception {
+        int retries = 0;
+        while (retries < 5) {
+            GetVideoInfoResponse response = getVideoInfo(videoId);
+            if (response.getVideo().getDuration() > 0) {
+                return response;
+            }
+            Thread.sleep(3000); // 等待3秒
+            retries++;
+        }
+        throw new ServiceException("无法获取视频时长");
+    }
 
 }

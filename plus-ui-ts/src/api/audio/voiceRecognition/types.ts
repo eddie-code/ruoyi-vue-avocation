@@ -18,9 +18,9 @@ export interface FileTransUploadForm {
 }
 
 /**
- * 文件上传进度信息
+ * 文件需需要字段
  */
-export interface FileTrans {
+export interface FileItem {
   /**
    * 当前上传的文件名
    */
@@ -30,6 +30,22 @@ export interface FileTrans {
    * 上传进度百分比（0-100）
    */
   percent: number;
+  /**
+   * 原音语言
+   */
+  lang: string;
+  /**
+   * 上传音频文件
+   */
+  audioAddr: string;
+  /**
+   * md5 加密过的key
+   */
+  fileSign: string;
+  /**
+   * videoId
+   */
+  vod: string
 }
 
 /**
@@ -49,7 +65,8 @@ export interface FileUploaderExpose {
   /**
    * 当前上传文件的状态信息
    */
-  filetrans: FileTrans;
+  filetrans: FileItem;
+
 }
 
 // 扩展事件类型声明

@@ -1,9 +1,9 @@
 <template>
   <!-- 文件上传模态框 -->
-  <a-modal v-model:open="open" title="文件上传" @ok="handleOk">
+  <a-modal v-model:open="open" title="" @ok="pay" ok-text="结算" cancel-text="取消">
     <!-- 文件选择触发按钮 -->
     <a-button type="primary" size="large" @click="handleClick">
-      <span><UploadOutlined /> 选择音频文件</span>
+      <span>选择音频文件</span>
     </a-button>
 
     <p></p>
@@ -40,6 +40,7 @@ import { ref, computed } from 'vue';
 import { notification } from 'ant-design-vue';
 import FileUploader from '@/components/Alibaba/Vod/FileUploader.vue';
 import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
+import { isEmpty } from 'radash';
 
 
 // 添加金额格式化方法
@@ -58,6 +59,7 @@ const open = ref(false);
 
 const FILETRANS_LANG_ARRAY = ref(window.FILETRANS_LANG_ARRAY)
 
+const lang = ref<string>(''); // 语言选择状态
 
 /**
  * 文件上传组件引用（包含类型提示）
@@ -108,13 +110,47 @@ const showModal = () => {
 };
 
 /**
- * 处理模态框确认按钮
+ * 处理模态框结算按钮
  * @param e 事件对象
  */
-const handleOk = (e: MouseEvent) => {
-  console.log('模态框确认', e);
-  open.value = false;
+const pay = (e: MouseEvent) => {
+
+  // 合并 filetrans 和 lang 到新对象
+  const mergedData = {
+    ...fileUploader.value?.filetrans, // 展开原始 filetrans 数据
+    lang: lang.value                  // 添加当前选择的语言
+  };
+
+  console.log('准备结算：', JSON.stringify(mergedData));
+
+  // 检查音频地址
+  if (isEmpty(fileUploader.value?.filetrans?.audioAddr)) {
+    notification.error({
+      message: '系统提示',
+      description: "请先上传音频文件",
+    });
+    return;
+  }
+
+  // 检查语言选择（lang是本地响应式变量）
+  if (isEmpty(lang.value)) {
+    notification.error({
+      message: '系统提示',
+      description: "请选择音频语言",
+    });
+    return;
+  }
+
+  // 检查金额（使用已计算的金额值）
+  if (calAmount.value === '0.00') {
+    notification.error({
+      message: '系统提示',
+      description: "金额不能为0",
+    });
+    return;
+  }
 };
+
 
 /**
  * 处理文件选择按钮点击

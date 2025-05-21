@@ -29,7 +29,11 @@ let videoId: string;
  */
 const filetrans = ref({
   name: '',
-  percent: 0
+  percent: 0,
+  lang: "",
+  audioAddr: "",
+  fileSign: "",
+  vod: ""
 });
 
 /**
@@ -40,11 +44,16 @@ const filetrans = ref({
 const resetFileTrans = () => {
   filetrans.value = {
     name: '',
-    percent: 0
+    percent: 0,
+    lang: "",
+    audioAddr: "",
+    fileSign: "",
+    vod: ""
   };
   if (fileUploadCom.value) {
     fileUploadCom.value.value = '';
   }
+
   console.log('上传状态已重置');
 };
 
@@ -78,6 +87,7 @@ const uploader = new AliyunUpload.Vod({
     emit('upload-success', fileUrl);
     // 关键修复：上传成功后再触发金额计算
     calculateAmount(videoId); // 确保使用最新的videoId
+    filetrans.value.audioAddr = fileUrl;
   },
 
   // 上传失败回调
@@ -103,7 +113,7 @@ const uploader = new AliyunUpload.Vod({
   // 上传结束回调
   onUploadEnd() {
     console.log('上传流程结束');
-    resetFileTrans(); // 上传完成后自动重置
+    // resetFileTrans(); // 上传完成后自动重置
   }
 });
 
@@ -165,12 +175,17 @@ const handleFileChange = () => {
   // 更新上传状态
   filetrans.value = {
     name: file.name,
-    percent: 0
+    percent: 0,
+    lang: "",
+    audioAddr: "",
+    fileSign: "",
+    vod: ""
   };
 
   // 生成文件唯一标识
   const fileHash = md5(file.name + file.type + file.size + file.lastModified);
   const fileKey = fileHash.substring(0, 16);
+  filetrans.value.fileSign = fileKey;
 
   // 获取上传凭证
   getCredentials({ name: file.name, key: fileKey })
@@ -185,6 +200,8 @@ const handleFileChange = () => {
         videoId = response.data.videoId; // 确保videoId更新
         // 关键新增：立即触发预计算（可选）
         calculateAmount(videoId);
+        filetrans.value.audioAddr = response.data.fileUrl;
+        filetrans.value.vod = videoId;
         return;
       }
 
@@ -193,6 +210,7 @@ const handleFileChange = () => {
       uploadAuth = response.data.uploadAuth;
       uploadAddress = response.data.uploadAddress;
       videoId = response.data.videoId; // 确保videoId更新
+      filetrans.value.vod = videoId;
       // 关键新增：立即触发预计算（可选）
       calculateAmount(videoId);
       uploader.addFile(file);
