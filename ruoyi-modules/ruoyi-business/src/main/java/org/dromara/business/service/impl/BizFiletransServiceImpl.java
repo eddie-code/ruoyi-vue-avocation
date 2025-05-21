@@ -8,6 +8,7 @@ import org.dromara.business.domain.BizFiletrans;
 import org.dromara.business.domain.bo.BizFiletransBo;
 import org.dromara.business.mapper.BizFiletransMapper;
 import org.dromara.business.service.IBizFiletransService;
+import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.vod.enums.FiletransPayStatusEnum;
 import org.dromara.common.vod.enums.FiletransStatusEnum;
 import org.dromara.common.vod.util.VodUtil;
@@ -34,39 +35,40 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         log.info("视频：{}，时长：{}", req.getVod(), duration);
         int second = Math.round(duration);
 
-        BizFiletrans BizFiletrans = new BizFiletrans();
-        validEntityBeforeSave(BizFiletrans);
+        BizFiletrans bizFiletrans = new BizFiletrans();
+        validEntityBeforeSave(bizFiletrans);
+        Long userId = LoginHelper.getUserId();
         long id = IdUtil.getSnowflakeNextId();
-        BizFiletrans.setId(id);
-        BizFiletrans.setMemberId(req.getMemberId());
-        BizFiletrans.setName(req.getName());
-        BizFiletrans.setSecond(second);
-        BizFiletrans.setAmount(req.getAmount());
-        BizFiletrans.setAudio(req.getAudio());
-        BizFiletrans.setFileSign(req.getFileSign());
-        BizFiletrans.setPayStatus(FiletransPayStatusEnum.I.getCode());
-        BizFiletrans.setStatus(FiletransStatusEnum.INIT.getCode());
-        BizFiletrans.setLang(req.getLang());
-        BizFiletrans.setVod(req.getVod());
-        BizFiletrans.setTaskId(req.getTaskId());
-//        BizFiletrans.setTransStatusCode();
-//        BizFiletrans.setTransStatusText();
-//        BizFiletrans.setTransTime();
-//        BizFiletrans.setSolveTime();
+        bizFiletrans.setId(id);
+        bizFiletrans.setMemberId(userId);
+        bizFiletrans.setName(req.getName());
+        bizFiletrans.setSecond(second);
+        bizFiletrans.setAmount(req.getAmount());
+        bizFiletrans.setAudio(req.getAudio());
+        bizFiletrans.setFileSign(req.getFileSign());
+        bizFiletrans.setPayStatus(FiletransPayStatusEnum.I.getCode());
+        bizFiletrans.setStatus(FiletransStatusEnum.INIT.getCode());
+        bizFiletrans.setLang(req.getLang());
+        bizFiletrans.setVod(req.getVod());
+        bizFiletrans.setTaskId(req.getTaskId());
+//        bizFiletrans.setTransStatusCode();
+//        bizFiletrans.setTransStatusText();
+//        bizFiletrans.setTransTime();
+//        bizFiletrans.setSolveTime();
 
-//        BizFiletrans.setDelFlag();
-//        BizFiletrans.setTenantId();
-//        BizFiletrans.setSearchValue();
-//        BizFiletrans.setCreateDept();
-//        BizFiletrans.setCreateBy();
-//        BizFiletrans.setCreateTime();
-//        BizFiletrans.setUpdateBy();
-//        BizFiletrans.setUpdateTime();
-//        BizFiletrans.setParams();
+//        bizFiletrans.setDelFlag();
+//        bizFiletrans.setTenantId(LoginHelper.getTenantId());
+//        bizFiletrans.setSearchValue();
+//        bizFiletrans.setCreateDept();
+//        bizFiletrans.setCreateBy();
+//        bizFiletrans.setCreateTime();
+//        bizFiletrans.setUpdateBy();
+//        bizFiletrans.setUpdateTime();
+//        bizFiletrans.setParams();
 
-        boolean flag = baseMapper.insert(BizFiletrans) > 0;
+        boolean flag = baseMapper.insert(bizFiletrans) > 0;
         if (flag) {
-            req.setId(BizFiletrans.getId());
+            req.setId(bizFiletrans.getId());
         }
         return flag;
     }

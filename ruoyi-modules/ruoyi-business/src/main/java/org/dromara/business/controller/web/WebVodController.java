@@ -1,6 +1,5 @@
 package org.dromara.business.controller.web;
 
-import cn.dev33.satoken.annotation.SaIgnore;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.vod.model.v20170321.CreateUploadVideoResponse;
@@ -21,7 +20,7 @@ import java.math.BigDecimal;
  * @author lee
  * @description
  */
-@SaIgnore // 跳过鉴
+//@SaIgnore // 跳过鉴
 @RestController
 @RequestMapping("/web/vod")
 public class WebVodController {
