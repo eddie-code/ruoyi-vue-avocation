@@ -1,0 +1,19 @@
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+    "tenantId": "000000",
+    "username": "admin",
+    "password": "admin123",
+    "rememberMe": true,
+    "clientId": "e5cd7e4891bf95d1d19206ce24a7b32e",
+    "grantType": "password"
+}
+
+> {%
+    client.log(JSON.stringify(response.body));
+    client.log(JSON.stringify(response.body.data.access_token));
+    client.log(JSON.stringify(response.body.data.client_id));
+    client.global.set("accessToken", response.body.data.access_token);
+    client.global.set("clientId", response.body.data.client_id);
+%}

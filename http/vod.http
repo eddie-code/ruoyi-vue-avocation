@@ -1,6 +1,8 @@
 POST http://localhost:8080/web/vod/get-upload-auth
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
+Clientid: {{clientId}}
 
 {
     "name": "test123.mp4",
@@ -11,5 +13,7 @@ Accept: application/json
 
 GET http://localhost:8080/web/vod/cal-amount/00af7506353571f0bfe85017f1e80102
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Clientid: {{clientId}}
 
 ###
