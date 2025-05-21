@@ -8,9 +8,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { notification } from 'ant-design-vue';
-import { getCredentials } from '@/api/audio/voiceRecognition/filetrans-upload';
+import { getCredentialsApi, calculateAmountApi, payApi } from '@/api/audio/voiceRecognition/filetrans-upload';
 import md5 from 'js-md5';
-import request from '@/utils/request'; // 新增引入request
+import { PayForm } from '@/api/audio/voiceRecognition/types';
 
 /**
  * 文件输入框DOM引用
@@ -56,6 +56,9 @@ const resetFileTrans = () => {
 
   console.log('上传状态已重置');
 };
+
+// 金额响应式变量
+const amount = ref<number>(0);
 
 /**
  * 阿里云VOD上传实例
@@ -122,25 +125,64 @@ const uploader = new AliyunUpload.Vod({
  * @param videoId 视频ID
  */
 const calculateAmount = async (videoId: string) => {
-  try {
-    const response = await request({
-      url: `/web/vod/cal-amount/${videoId}`,
-      method: 'get'
+  calculateAmountApi(videoId)
+    .then((response: any) => {
+      if (response.code === 200) {
+        console.log('金额接口返回:', response.data);
+        amount.value = response.data; // 保存金额
+        emit('amount-calculated', response.data);
+      } else {
+        throw new Error(response.msg || '金额计算失败');
+      }
+    })
+    .catch((error: any) => {
+      console.error('请求或处理失败:', error);
+      notification.warning({
+        message: '费用计算失败',
+        description: error.message || '无法获取预估费用'
+      });
+      emit('amount-calculated', '0.00'); // 失败时重置金额
     });
+};
 
-    if (response.code === 200) {
-      emit('amount-calculated', response.data); // 触发金额事件
-    } else {
-      throw new Error(response.msg || '金额计算失败');
-    }
-  } catch (error: any) {
-    console.error('金额计算错误:', error);
-    notification.warning({
-      message: '费用计算失败',
-      description: error.message || '无法获取预估费用'
-    });
-    emit('amount-calculated', '0.00'); // 失败时重置金额
+// 支付处理方法
+const handlePay = () => {
+  if (!filetrans.value.vod) {
+    notification.error({ message: '支付失败', description: '未获取到视频ID' });
+    return;
   }
+
+  const payData: PayForm = {
+    name: filetrans.value.name,
+    percent: filetrans.value.percent, // 根据实际需求调整
+    amount: amount.value,
+    lang: filetrans.value.lang, // lang是指音频语言
+    audio: filetrans.value.audioAddr,
+    fileSign: filetrans.value.fileSign,
+    vod: filetrans.value.vod,
+    channel: 'web' // 假设渠道为web
+  };
+
+  console.log('下单请求数据:', payData); // 调试日志
+
+  payApi(payData)
+    .then(response => {
+      console.log('支付响应:', response); // 调试日志
+      if (response.code === 200) {
+        notification.success({
+          message: '系统提示',
+          description: '下单成功'
+        });
+        emit('pay-success'); // 可选：触发支付成功事件
+      }
+    })
+    .catch(error => {
+      console.error('支付错误:', error); // 调试日志
+      notification.error({
+        message: '系统提示',
+        description: error.message || '下单失败'
+      });
+    });
 };
 
 // 更新事件定义
@@ -148,7 +190,8 @@ const emit = defineEmits([
   'upload-success',
   'upload-failed',
   'upload-progress',
-  'amount-calculated' // 新增金额事件
+  'amount-calculated', // 新增金额事件
+  'pay-success' // 触发支付成功事件
 ]);
 
 /**
@@ -188,7 +231,7 @@ const handleFileChange = () => {
   filetrans.value.fileSign = fileKey;
 
   // 获取上传凭证
-  getCredentials({ name: file.name, key: fileKey })
+  getCredentialsApi({ name: file.name, key: fileKey })
     .then((response) => {
       if (response.code !== 200) throw new Error(response.msg);
 
@@ -239,10 +282,11 @@ const selectFile = () => {
   }
 };
 
-// 暴露给父组件的方法和属性
+// 暴露支付方法给父组件（如果需要在外部调用）
 defineExpose({
   selectFile,
   resetFileTrans,
-  filetrans
+  filetrans,
+  handlePay
 });
 </script>

@@ -34,7 +34,7 @@ public class WebBizFiletransController extends BaseController {
         log.info("语音识别支付开始");
         bizFiletransService.pay(req);
         log.info("语音识别支付结束");
-        return new R<>();
+        return R.ok();
     }
 
 }

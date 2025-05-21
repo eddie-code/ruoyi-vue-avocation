@@ -18,7 +18,21 @@ export interface FileTransUploadForm {
 }
 
 /**
- * 文件需需要字段
+ * 支付金额
+ */
+export interface PayForm {
+  name: string | number;
+  percent: number;
+  amount: number;
+  lang: string | number;
+  audio: string | number;
+  fileSign: string | number;
+  vod: string | number;
+  channel: string | number;
+}
+
+/**
+ * 文件需需要字段（前端交互）
  */
 export interface FileItem {
   /**
@@ -45,11 +59,11 @@ export interface FileItem {
   /**
    * videoId
    */
-  vod: string
+  vod: string;
 }
 
 /**
- * 文件上传组件暴露的方法和属性
+ * 文件上传组件暴露的方法和属性（前端交互）
  */
 export interface FileUploaderExpose {
   /**
@@ -67,21 +81,15 @@ export interface FileUploaderExpose {
    */
   filetrans: FileItem;
 
+  /**
+   * 触发下单功能
+   */
+  handlePay: () => void;
 }
 
 // 扩展事件类型声明
 declare module 'vue' {
   interface ComponentCustomProperties {
-    $emit: (
-      event: 'amount-calculated',
-      amount: string | number
-    ) => void;
+    $emit: (event: 'amount-calculated', amount: string | number) => void;
   }
-}
-
-// 新增金额计算接口响应类型
-export interface CalAmountResponse {
-  code: number;
-  msg: string;
-  data: string | number;
 }

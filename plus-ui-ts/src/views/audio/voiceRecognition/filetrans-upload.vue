@@ -114,6 +114,12 @@ const showModal = () => {
  * @param e 事件对象
  */
 const pay = (e: MouseEvent) => {
+  console.log('处理模态框结算按钮', e);
+
+  // 同步语言到FileUploader组件
+  if (fileUploader.value) {
+    fileUploader.value.filetrans.lang = lang.value;
+  }
 
   // 合并 filetrans 和 lang 到新对象
   const mergedData = {
@@ -142,13 +148,18 @@ const pay = (e: MouseEvent) => {
   }
 
   // 检查金额（使用已计算的金额值）
-  if (calAmount.value === '0.00') {
+  if (calAmount.value === '0.00' || calAmount.value === '0') {
+    // 当计算金额的值为 '0.00' 或 '0' 时，执行特定的逻辑
     notification.error({
       message: '系统提示',
       description: "金额不能为0",
     });
     return;
   }
+
+  // 通过ref获取FileUploader实例
+  fileUploader.value?.handlePay();
+
 };
 
 
