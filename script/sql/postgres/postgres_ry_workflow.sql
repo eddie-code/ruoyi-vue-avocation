@@ -1,5 +1,5 @@
 -- ----------------------------
--- 0、warm-flow-all.sql，地址：https://gitee.com/dromara/warm-flow/blob/master/sql/postgresql/postgresql-warm-flow-all.sql
+-- 0、warm-flow-ruoyi-business.sql，地址：https://gitee.com/dromara/warm-flow/blob/master/sql/postgresql/postgresql-warm-flow-ruoyi-business.sql
 -- ----------------------------
 CREATE TABLE flow_definition
 (

@@ -375,6 +375,12 @@
                 <version>${revision}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-order</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <!-- 阿里云Vod 官方示例：https://help.aliyun.com/zh/vod/developer-reference/upload-sdk-for-java?spm=a2c4g.11186623.help-menu-29932.d_4_1_6_2_0.2ff22b83mcKKud&scm=20140722.H_53406._.OR_help-T_cn~zh-V_1 -->
             <dependency>
                 <groupId>com.aliyun</groupId>

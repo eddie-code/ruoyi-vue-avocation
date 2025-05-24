@@ -1,0 +1,17 @@
+支付宝开放平台
+https://open.alipay.com/
+
+网页/移动应用
+https://open.alipay.com/module/webApp
+
+开发 > 服务端 > 支付产品 > 电脑网站支付 > API 列表 > 交易 > 统一收单下单并支付页面接口
+https://opendocs.alipay.com/open/59da99d0_alipay.trade.page.pay?scene=22&pathHash=e26b497f
+
+开发工具
+https://opendocs.alipay.com/open/009ys9
+
+工具 > 开发工具包（SDK）下载 > 服务端 SDK > Java > Easy 版
+https://opendocs.alipay.com/open/02np95?pathHash=1726489f
+
+通用工具 > API 集成工具集 > 沙箱环境 > 快速接入 > 后端开发过程使用沙箱 > 沙箱控制台
+https://open.alipay.com/develop/sandbox/app

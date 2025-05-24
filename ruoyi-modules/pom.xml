@@ -16,6 +16,7 @@
         <module>ruoyi-system</module>
         <module>ruoyi-workflow</module>
         <module>ruoyi-business</module>
+        <module>ruoyi-order</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>

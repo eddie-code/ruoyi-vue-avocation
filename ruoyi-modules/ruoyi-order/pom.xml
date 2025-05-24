@@ -8,21 +8,20 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>ruoyi-business</artifactId>
+    <artifactId>ruoyi-order</artifactId>
 
     <description>
-        business模块
+        order模块
     </description>
 
     <dependencies>
 
-        <!-- 通用工具-->
-        <!-- ruoyi-common-vod 已经添加过ruoyi-common-core依赖-->
-<!--        <dependency>-->
-<!--            <groupId>org.dromara</groupId>-->
-<!--            <artifactId>ruoyi-common-core</artifactId>-->
-<!--        </dependency>-->
+        <!-- 通用工具 -->
+        <!-- ruoyi-common-vod 已经添加过ruoyi-common-core依赖 -->
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-common-core</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.dromara</groupId>
@@ -104,17 +103,7 @@
             <artifactId>ruoyi-common-websocket</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-vod</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-order</artifactId>
-        </dependency>
-
-
     </dependencies>
+
 
 </project>
