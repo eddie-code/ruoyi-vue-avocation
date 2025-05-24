@@ -1,13 +1,16 @@
 package org.dromara.order.domain;
 
-import org.dromara.common.tenant.core.TenantEntity;
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.math.BigDecimal;
-import java.util.Date;
+import org.dromara.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 订单信息对象 order_info
@@ -77,11 +80,13 @@ public class OrderInfo extends TenantEntity {
     /**
      * 交易状态|枚举[OrderInfoStatusEnum]
      */
+    @TableField(value = "`STATUS`") // 关键：反引号包裹保留字
     private String status;
 
     /**
      * 订单描述
      */
+    @TableField(value = "`DESC`") // 关键：反引号包裹保留字
     private String desc;
 
     /**

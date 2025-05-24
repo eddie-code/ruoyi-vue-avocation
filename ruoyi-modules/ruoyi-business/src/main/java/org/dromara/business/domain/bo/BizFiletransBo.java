@@ -108,5 +108,10 @@ public class BizFiletransBo extends BaseEntity {
      */
     private Date solveTime;
 
+    /**
+     * 支付方式
+     */
+    private String channel;
+
 
 }

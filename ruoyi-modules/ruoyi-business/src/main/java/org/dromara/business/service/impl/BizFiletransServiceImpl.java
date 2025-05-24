@@ -8,11 +8,18 @@ import org.dromara.business.domain.BizFiletrans;
 import org.dromara.business.domain.bo.BizFiletransBo;
 import org.dromara.business.mapper.BizFiletransMapper;
 import org.dromara.business.service.IBizFiletransService;
+import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.vod.enums.FiletransPayStatusEnum;
 import org.dromara.common.vod.enums.FiletransStatusEnum;
 import org.dromara.common.vod.util.VodUtil;
+import org.dromara.order.domain.bo.OrderInfoBo;
+import org.dromara.order.enums.OrderInfoOrderTypeEnum;
+import org.dromara.order.service.IOrderInfoService;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 语音识别Service业务层处理
@@ -27,8 +34,10 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
 
     private final BizFiletransMapper baseMapper;
 
+    private final IOrderInfoService orderInfoService;
+
     @Override
-    public Boolean pay(BizFiletransBo req) throws Exception {
+    public String pay(BizFiletransBo req) throws Exception {
         // 获取视频信息
         GetVideoInfoResponse videoInfo = VodUtil.getVideoInfo(req.getVod());
         Float duration = videoInfo.getVideo().getDuration();
@@ -70,7 +79,22 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         if (flag) {
             req.setId(bizFiletrans.getId());
         }
-        return flag;
+
+        // 保存订单信息
+        OrderInfoBo orderInfoPayReq = new OrderInfoBo();
+        orderInfoPayReq.setOrderType(OrderInfoOrderTypeEnum.FILETRANS_PAY.getCode());
+        // 订单表的info保存语音识别表的id
+//        orderInfoPayReq.setInfo("biz_filetrans:"+ id);
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", "biz_filetrans"); // 业务标识
+        map.put("id", id); // 对应某种业务表的主键id
+        String infos = JsonUtils.toJsonString(map);
+        orderInfoPayReq.setInfo(infos);
+        orderInfoPayReq.setAmount(req.getAmount());
+        orderInfoPayReq.setChannel(req.getChannel());
+        orderInfoPayReq.setDesc("语音识别付费");
+
+        return orderInfoService.pay(orderInfoPayReq);
     }
 
     /**

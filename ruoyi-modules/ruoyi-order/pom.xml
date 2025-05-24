@@ -103,6 +103,18 @@
             <artifactId>ruoyi-common-websocket</artifactId>
         </dependency>
 
+        <!-- 支付宝支付 Easy版SDK -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-easysdk</artifactId>
+        </dependency>
+
+        <!-- 支付宝支付 通用版SDK 异步通知需要 -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+        </dependency>
+
     </dependencies>
 
 

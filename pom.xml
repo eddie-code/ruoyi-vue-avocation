@@ -56,6 +56,10 @@
         <aliyun-sdk-oss.version>3.10.2</aliyun-sdk-oss.version>
         <aliyun-java-sdk-vod.version>2.16.11</aliyun-java-sdk-vod.version>
 
+        <!-- 支付宝支付 -->
+        <alipay-easysdk.version>2.2.3</alipay-easysdk.version>
+        <alipay-sdk-java.version>4.40.231.ALL</alipay-sdk-java.version>
+
         <!-- 插件版本 -->
         <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
         <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
@@ -396,6 +400,20 @@
                 <groupId>com.aliyun</groupId>
                 <artifactId>aliyun-java-sdk-vod</artifactId>
                 <version>${aliyun-java-sdk-vod.version}</version>
+            </dependency>
+
+            <!-- 支付宝支付 Easy版SDK -->
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-easysdk</artifactId>
+                <version>${alipay-easysdk.version}</version>
+            </dependency>
+
+            <!-- 支付宝支付 通用版SDK 异步通知需要 -->
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-sdk-java</artifactId>
+                <version>${alipay-sdk-java.version}</version>
             </dependency>
 
         </dependencies>

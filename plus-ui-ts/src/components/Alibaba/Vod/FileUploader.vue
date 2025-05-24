@@ -160,7 +160,7 @@ const handlePay = () => {
     audio: filetrans.value.audioAddr,
     fileSign: filetrans.value.fileSign,
     vod: filetrans.value.vod,
-    channel: 'web' // 假设渠道为web
+    channel: 'A' // 默认支付宝
   };
 
   console.log('下单请求数据:', payData); // 调试日志

@@ -11,6 +11,6 @@ import org.dromara.business.domain.bo.BizFiletransBo;
  */
 public interface IBizFiletransService {
 
-    Boolean pay(@Valid BizFiletransBo req) throws Exception;
+    String pay(@Valid BizFiletransBo req) throws Exception;
 
 }

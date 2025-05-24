@@ -32,9 +32,9 @@ public class WebBizFiletransController extends BaseController {
     @PostMapping("/pay")
     public R<Object> pay(@Valid @RequestBody BizFiletransBo req) throws Exception {
         log.info("语音识别支付开始");
-        bizFiletransService.pay(req);
+        String result = bizFiletransService.pay(req);
         log.info("语音识别支付结束");
-        return R.ok();
+        return R.ok(result);
     }
 
 }

@@ -1,5 +1,7 @@
 package org.dromara.order.service;
 
+import org.dromara.order.domain.bo.OrderInfoBo;
+
 /**
  * 订单信息Service接口
  *
@@ -7,5 +9,7 @@ package org.dromara.order.service;
  * @date 2025-05-22
  */
 public interface IOrderInfoService {
+
+    String pay(OrderInfoBo req);
 
 }

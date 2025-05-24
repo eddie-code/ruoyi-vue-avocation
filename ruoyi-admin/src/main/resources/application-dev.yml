@@ -197,6 +197,24 @@ filetrans:
   audio:
     price: 0.2  # 正确配置，值为 0.2
 
+# 支付宝支付
+# 沙箱环境：https://open.alipay.com/develop/sandbox/app?is_switch_sandbox=true
+alipay:
+  # 应用信息 > 开发信息 > 接口加签方式 > 系统默认密钥 > 公钥模式 > 查看 > 支付宝公钥:
+  alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmC4zgh4ZF9ZNPSr8ha5l7qoCgVSdXExCj6LN4CuYIBdo94qYLcpcW07yB/7+vvOyQ8vDgWVYxMC6zCCcYdB2aDENI569Rfm6WqgIE7Snt/y5YWisyB5vQg7Balz982jL45+nk5Ew7W5B2F4d/BFg6ysDfJUDHPGBCZ0gcfm3TRwxOZ8sTeq+/kEo/XJ14lClhr4cH2Ck9jss5oVxpSU8JvKIO8yGr3q+o2gydJIwRh/94tyTywszZ9ENCi6M+81Zrw1F5xAiJIB6PCkJ/9G8CKgaBUjhENFBsts4z50x87JI17Y7ktJaXZ868b5M6Dt3WfZF1ZSrmToBE6sOouJ61wIDAQAB
+  # 应用信息 > 基本信息
+  appId: 9021000144678582
+  # 应用信息 > 开发信息 > 接口内容加密方式 > 查看
+  encryptKey:  p2ObzYRowfzWX+P5CRD5hQ==
+  gatewayHost: openapi-sandbox.dl.alipaydev.com
+  # 应用信息 > 开发信息 > 支付宝网关地址
+  gatewayHttpsHost: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+  # 应用信息 > 开发信息 > 接口加签方式 > 系统默认密钥 > 公钥模式 > 查看 > 应用私钥:
+  merchantPrivateKey: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCcyrd6sX1YUcZ1Yu/dX/uA6YYpCKc+7CLhAF3bj7L0nb59YSrjJJiz9r+y69yz/7PDrXnJgeefNA2y2XAwMvAlF1nNCOh5EvtQ1zWv6p7isZ75eajIS6TVSxF5/Ma9OUHV1GjCG57/he1LNpM+TsO5f1BqkFVeqcFfhsw1LmgEthq/Z8DyHBw9PTk39pPhQklJF8j/BK1k7A/wzFfixfkWGWLA4VC4ElCBmOYr2+hZ9rxg0kFCvTTQc+QzbK/o0cFcMefzAX+VMJrkyBo1GfUHVB7kG634q92yWboKFsBjAgXtYGYFBdCP0ppjw9G3KGJV2GPsbL/7/1UAkA31EUZVAgMBAAECggEAI9c/C9/ovDitOgYsuJkJP9Wh4l1lBcAq1O4lhlwZ10r70WNVz2h9M54zAe5inA7Wg+Ny1HpKfR0ECJ8lww7R0Fi/IVxo78xEAJ3BWv4x5bYelf6Wc3q/Kjanvw/mSjj9cKjGbaCsvtJZhPjrvbF5kjylIEbwDNyXJIQGyB1cj77IwrHD5pLdK89A04lcpzTuTsswRAjpF87kD87eT3mFtP9U6A3pWVpJE4v+mNkW1ztnatc+lmPC9froYbR3Szvra4OQST0FHjMt4Qt/HZVVNgpfM60cCSr8g2lIk5jtLPs2PRFaAO/TvgOgpbFOf4Fn9kG4MaV9/e/eE6merDUgXQKBgQDf76CCDVvMeUBPirlEirjsqnZ3SEsQlTgpIG5qeBHldlup7twkcFZ4jV4cS25Z/m57JG+Vl2NfrfJ8rlwv06KHpoZCjJjU1W1Vjz0rsrzHO7lWB1XCA/vtI7TEDoQX13fJQPF3sp6vN166MmKx9Onj0IfaJGNxcSkJQNeeMthivwKBgQCzPeuq9EncGbIW3J9GIoKAJqUGvlfqnoXZ0Jt6PFh/Tj8MReqPQE589i0vDyt7HFGChrDx39cZ2e8FC+TSlxpvU0sZvZrzqUCcvK5r3iM8ZkLPUiodipXnDJ91aYtvFCMoE866D5cnZcIT4SrqqyjReSLWG88B9leRmMxoNWaf6wKBgGL5oHGaweYf+UKux6/5uD4yIWYbN8I+kbHruaGpLA/FPkJfZkFcvXtO0DelR0LTZ7VZp0/wt2VElpZw4iHpYj6eZVzok2wOYOKeCqVTvIg6Z3IUj9zOsfxf+bdlyxBWlYUIBTGoauZ6jI2zU1fgLbgZJNJPnvw2zbJfTG2Jf4Y1AoGAZTdCLXdlffTErERJbMFwEA3CgtxZqRN7YlR6d7w7/SeiUrvoiJw3tjkNqtVWKF8FaD/HC87rGJ4Ia0EcJg9Nzi+q6Q44wf+BjQC/Pgpiu2jDsW8keSoZHC/0m8jOBBvK/oaw5kCHiqfbwH4WTg35LtDI6z8o1mLVcFJomzAMk6ECgYEAs79ZZTGjJZHOfljRcioIEVcVN9Li8ZIsqYo0KGYpBBS2INcA4w8bUXZ8nspYVZvgYmodBQGsl7f4vm7UXZJyteHOGHO9TiejztdaE+yV4BQD4Uf5VFh2JdfE3PuC3HEWu6xcztm0gwULvHia2piXMJOq+tTrql82p7T0A50hd5A=
+  notifyUrl: http://callback.jiawablog.com/callback/131308298765996032
+  # 支付成功后跳转的页面
+  returnUrl: https://www.baidu.com/
+
 --- # 三方授权
 justauth:
   # 前端外网访问地址
