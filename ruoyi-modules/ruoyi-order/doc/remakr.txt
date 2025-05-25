@@ -15,3 +15,18 @@ https://opendocs.alipay.com/open/02np95?pathHash=1726489f
 
 通用工具 > API 集成工具集 > 沙箱环境 > 快速接入 > 后端开发过程使用沙箱 > 沙箱控制台
 https://open.alipay.com/develop/sandbox/app
+
+支付宝开放平台 > 开发接入 > 网页/移动应用开发
+https://open.alipay.com/module/webApp
+
+（需要配置）支付宝开放平台 > 开发接入 > 网页/移动应用开发 > 审核 > 接口加签方式/接口内容加密方式 > 密钥工具
+https://opendocs.alipay.com/common/02kipk
+
+（可选）IP白名单管理（通过指定接口和对应的ip，来提高接口访问的安全性。注：没有配置默认不进行任何拦截）
+https://open.alipay.com/svr/dev-ability/ip-config?appId=2021005154613808&type=appManage
+
+支付宝 - 商家平台
+https://b.alipay.com/page/home
+
+（需要配置）支付宝 - 商家平台 > 账号中心 > 绑定 > APPID绑定
+https://b.alipay.com/page/account-manage-oc/bind/appIdBindList
