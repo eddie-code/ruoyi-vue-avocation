@@ -1,16 +1,16 @@
 <template>
   <div>
     <!-- 隐藏的文件输入框 -->
-    <input type="file" style="display: none" ref="fileUploadCom" accept=".mp3,.wav,.m4a" @change="handleFileChange" />
+    <input type="file" style="display: none" ref="fileUploadCom" accept=".mp3,.wav,.m4a" @change="handleFileChange"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { notification } from 'ant-design-vue';
-import { getCredentialsApi, calculateAmountApi, payApi } from '@/api/audio/voiceRecognition/filetrans-upload';
+import {ref} from 'vue';
+import {notification} from 'ant-design-vue';
+import {getCredentialsApi, calculateAmountApi, payApi} from '@/api/audio/voiceRecognition/filetrans-upload';
 import md5 from 'js-md5';
-import { PayForm } from '@/api/audio/voiceRecognition/types';
+import {PayForm} from '@/api/audio/voiceRecognition/types';
 
 /**
  * 文件输入框DOM引用
@@ -96,7 +96,7 @@ const uploader = new AliyunUpload.Vod({
   // 上传失败回调
   onUploadFailed(uploadInfo, code, message) {
     console.log('上传失败:', uploadInfo.file.name, 'code:', code, 'message:', message);
-    emit('upload-failed', { code, message });
+    emit('upload-failed', {code, message});
   },
 
   // 上传进度回调
@@ -148,7 +148,7 @@ const calculateAmount = async (videoId: string) => {
 // 支付处理方法
 const handlePay = () => {
   if (!filetrans.value.vod) {
-    notification.error({ message: '支付失败', description: '未获取到视频ID' });
+    notification.error({message: '支付失败', description: '未获取到视频ID'});
     return;
   }
 
@@ -174,6 +174,17 @@ const handlePay = () => {
           description: '下单成功'
         });
         emit('pay-success'); // 可选：触发支付成功事件
+        // 处理支付宝返回的表单
+        let divForm = document.getElementsByTagName('divform');
+        if (divForm.length) {
+          document.body.removeChild(divForm[0])
+        }
+        const div = document.createElement('divform');
+        // 支付宝返回的form
+        div.innerHTML = response.msg;
+        document.body.appendChild(div);
+        document.forms[0].setAttribute('target', '_blank');
+        document.forms[0].submit();
       }
     })
     .catch(error => {
@@ -231,7 +242,7 @@ const handleFileChange = () => {
   filetrans.value.fileSign = fileKey;
 
   // 获取上传凭证
-  getCredentialsApi({ name: file.name, key: fileKey })
+  getCredentialsApi({name: file.name, key: fileKey})
     .then((response) => {
       if (response.code !== 200) throw new Error(response.msg);
 

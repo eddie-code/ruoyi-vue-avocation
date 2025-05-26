@@ -29,8 +29,11 @@ public class AliPayServiceImpl implements IAliPayService {
         Factory.setOptions(getOptions());
         try {
             // 2. 发起API调用（以创建网站支付为例）
-            AlipayTradePagePayResponse response = Factory.Payment.Page().optional("qr_pay_mode", "4")
-                .pay(subject, outTradeNo, totalAmount, aliPayProperties.getReturnUrl());
+//            AlipayTradePagePayResponse response = Factory.Payment.Page()
+//                .optional("qr_pay_mode", "4")  // 如果指定了就会, 强制使用扫码支付, 不会出现支付页面
+//                .pay(subject, outTradeNo, totalAmount, aliPayProperties.getReturnUrl()); // 支付完成后，指定返回的页面，自己定义的
+            AlipayTradePagePayResponse response = Factory.Payment.Page()
+                .pay(subject, outTradeNo, totalAmount, null);
             // 3. 处理响应或异常
             if (ResponseChecker.success(response)) {
                 log.info("调用支付宝下单接口成功，结果：{}", JSON.toJSONString(response));

@@ -107,6 +107,7 @@ const showModal = () => {
   open.value = true;
   fileUploader.value?.resetFileTrans(); // 每次打开时重置状态
   resetAmount(); // 每次打开模态框时重置金额
+  lang.value = '';
 };
 
 /**

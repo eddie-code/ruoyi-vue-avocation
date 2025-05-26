@@ -86,3 +86,40 @@ grantType 	授权类型（表 sys_client）
     "data": null
 }
 ```
+
+### feat(order): 11.9 下单成功后跳转到支付宝支付页面
+
+#### 控制返回二维码, 还是支付页面配置
+
+org.dromara.order.alipay.impl.AliPayServiceImpl
+
+- `"qr_pay_mode", "4"`, 强制使用扫码支付
+- `aliPayProperties.getReturnUrl()` 支付完成后，指定返回的页面
+
+```java
+@Override
+public AlipayTradePagePayResponse pay(String subject, String outTradeNo, String totalAmount) {
+    log.info("调用支付宝下单接口开始，subject：{}，outTradeNo：{}，totalAmount：{}", subject, outTradeNo, totalAmount);
+    // 1. 设置参数（全局只需设置一次）
+    Factory.setOptions(getOptions());
+    try {
+        // 2. 发起API调用（以创建网站支付为例）
+//            AlipayTradePagePayResponse response = Factory.Payment.Page()
+//                .optional("qr_pay_mode", "4")  // 如果指定了就会, 强制使用扫码支付, 不会出现支付页面
+//                .pay(subject, outTradeNo, totalAmount, aliPayProperties.getReturnUrl()); // 支付完成后，指定返回的页面，自己定义的
+        AlipayTradePagePayResponse response = Factory.Payment.Page()
+            .pay(subject, outTradeNo, totalAmount, null);
+        // 3. 处理响应或异常
+        if (ResponseChecker.success(response)) {
+            log.info("调用支付宝下单接口成功，结果：{}", JSON.toJSONString(response));
+            return response;
+        } else {
+            log.warn("调用支付宝下单接口失败，原因：{}", JSON.toJSONString(response));
+            throw new ServiceException(BusinessExceptionEnum.ALIPAY_ERROR.getDesc());
+        }
+    } catch (Exception e) {
+        log.error("调用支付宝下单接口异常，原因：", e);
+        throw new ServiceException(BusinessExceptionEnum.ALIPAY_ERROR.getDesc());
+    }
+}
+```

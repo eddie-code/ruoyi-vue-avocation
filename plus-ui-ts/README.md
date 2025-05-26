@@ -83,3 +83,21 @@ plus-ui-ts
 - 新增 FileTrans 和 FileUploaderExpose 接口，用于定义上传状态和暴露的方法
 - 更新 filetrans-upload组件，集成新的上传状态显示功能
 - 优化文件上传逻辑，支持上传进度实时更新
+
+### feat(order): 11.9 下单成功后跳转到支付宝支付页面
+
+#### 下单成功后，添加一段JS代码 （代码段可以复制到其他前端，只要支持JS环境）
+
+```js
+// 处理支付宝返回的表单
+let divForm = document.getElementsByTagName('divform');
+if (divForm.length) {
+  document.body.removeChild(divForm[0])
+}
+const div = document.createElement('divform');
+// 支付宝返回的form
+div.innerHTML = response.msg;
+document.body.appendChild(div);
+document.forms[0].setAttribute('target', '_blank');
+document.forms[0].submit();
+```
