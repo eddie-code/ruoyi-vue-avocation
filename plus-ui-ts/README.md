@@ -101,3 +101,9 @@ document.body.appendChild(div);
 document.forms[0].setAttribute('target', '_blank');
 document.forms[0].submit();
 ```
+
+### feat(audio): 11.12 增加支付宝扫码组件, 下单后弹出支付宝二维码对话框
+
+#### [alipay-com.vue组件说明](src/components/Alibaba/OrderInfo/alipay-com.vue)
+
+`包含二维码的显示、订单的定时查询、支付结果事件等小功能, 以后如果也有这样需求的支付方式，可以微调后复用到别的项目里`

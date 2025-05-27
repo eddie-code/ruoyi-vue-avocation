@@ -1,3 +1,4 @@
+<!--包含二维码的显示、订单的定时查询、支付结果事件等小功能 -->
 <template>
   <a-modal
     :title="payInfo.desc"
