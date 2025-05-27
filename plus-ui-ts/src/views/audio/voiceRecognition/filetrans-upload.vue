@@ -9,7 +9,7 @@
     <p></p>
 
     <!-- 更新组件事件监听 -->
-    <FileUploader
+    <FiletransUploadCom
       ref="fileUploader"
       @upload-success="handleUploadSuccess"
       @upload-failed="handleUploadFailed"
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { notification } from 'ant-design-vue';
-import FileUploader from '@/components/Alibaba/Vod/FileUploader.vue';
+import FiletransUploadCom from '@/components/Alibaba/Vod/filetrans-upload-com.vue';
 import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
 import { isEmpty } from 'radash';
 
