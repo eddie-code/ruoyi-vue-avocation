@@ -1,0 +1,7 @@
+GET http://localhost:8080/web/order-info/query-order-status/20250527110902637179
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Clientid: {{clientId}}
+
+###
+
