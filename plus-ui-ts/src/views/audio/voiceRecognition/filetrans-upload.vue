@@ -14,6 +14,7 @@
       @upload-success="handleUploadSuccess"
       @upload-failed="handleUploadFailed"
       @amount-calculated="handleAmountCalculated"
+      @trigger-alipay="handleTriggerAlipay"
     />
 
     <!-- 上传状态显示 -->
@@ -37,6 +38,9 @@
         <a-radio value="W"><img src="/image/wechatpay.jpg" alt="微信" style="height: 100px;"/></a-radio>
       </a-radio-group>
     </p>
+
+    <AlipayCom ref="alipayCom" @after-pay="handleAfterPay" />
+
     <!-- 模态框其他内容 -->
     <p>支持格式：.mp3, .wav, .m4a，最大500MB</p>
   </a-modal>
@@ -48,6 +52,7 @@ import { notification } from 'ant-design-vue';
 import FiletransUploadCom from '@/components/Alibaba/Vod/filetrans-upload-com.vue';
 import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
 import { isEmpty } from 'radash';
+import AlipayCom from '@/components/Alibaba/OrderInfo/alipay-com.vue';
 
 
 // 添加金额格式化方法
@@ -57,6 +62,9 @@ const formatAmount = (amount: string) => {
     maximumFractionDigits: 2
   });
 };
+
+// 处理支付宝弹窗的方法
+const alipayCom = ref<InstanceType<typeof AlipayCom>>(); // 明确组件类型
 
 /**
  * 添加支付方式响应式变量
@@ -91,6 +99,33 @@ const handleAmountCalculated = (amount: string | number) => {
   } catch {
     calAmount.value = '0.00';
   }
+};
+
+/**
+ * 支付状态检查
+ */
+const handleAfterPay = (status: string) => {
+  if (status === 'S') {
+    notification['success']({
+      message: '支付宝支付提示',
+      description: "支付成功，感谢您的使用！",
+    });
+    open.value = false; // 关闭上传模态框
+  } else {
+    notification['error']({
+      message: '支付宝支付失败',
+      description: "支付失败！请重新发起支付！",
+    });
+  }
+};
+
+const handleTriggerAlipay = (payInfo: any) => {
+  alipayCom.value?.handleOpen({
+    amount: payInfo.amount,
+    desc: "语音识别结算",
+    qrcode: payInfo.qrcode,
+    orderNo: payInfo.orderNo
+  });
 };
 
 /**

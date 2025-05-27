@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.dromara.common.web.core.BaseController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 订单信息
  *
@@ -31,12 +34,14 @@ public class OrderInfoController extends BaseController {
     public R<Object> sendForRegister(@PathVariable String orderNo) {
         // 调用服务层方法查询订单状态
         String status = orderInfoService.queryOrderStatus(orderNo);
+        Map<String, String> map = new HashMap<>();
+        map.put("status", status);
         // 将查询到的状态封装到响应对象R中并返回
         // I("I", "未支付"),
         // P("P", "处理中"),
         // S("S", "支付成功"),
         // F("F", "支付失败");
-        return R.ok(status);
+        return R.ok(map);
     }
 
 

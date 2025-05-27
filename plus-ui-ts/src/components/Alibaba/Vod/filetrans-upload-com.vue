@@ -176,17 +176,26 @@ const handlePay = () => {
           description: '下单成功, 订单号：' + response.data.orderNo
         });
         emit('pay-success'); // 可选：触发支付成功事件
-        // 处理支付宝返回的表单
-        let divForm = document.getElementsByTagName('divform');
-        if (divForm.length) {
-          document.body.removeChild(divForm[0])
+        // // 处理支付宝返回的表单
+        // let divForm = document.getElementsByTagName('divform');
+        // if (divForm.length) {
+        //   document.body.removeChild(divForm[0])
+        // }
+        // const div = document.createElement('divform');
+        // // 支付宝返回的form
+        // div.innerHTML = response.data.channelResult;
+        // document.body.appendChild(div);
+        // document.forms[0].setAttribute('target', '_blank');
+        // document.forms[0].submit();
+        // 判断支付渠道并调用支付宝组件
+        if (filetrans.value.channel === "A") {
+          // 通过事件将支付信息传递给父组件
+          emit('trigger-alipay', {
+            amount: amount.value,
+            qrcode: response.data.channelResult,
+            orderNo: response.data.orderNo
+          });
         }
-        const div = document.createElement('divform');
-        // 支付宝返回的form
-        div.innerHTML = response.data.channelResult;
-        document.body.appendChild(div);
-        document.forms[0].setAttribute('target', '_blank');
-        document.forms[0].submit();
       }
     })
     .catch(error => {
@@ -204,7 +213,8 @@ const emit = defineEmits([
   'upload-failed',
   'upload-progress',
   'amount-calculated', // 新增金额事件
-  'pay-success' // 触发支付成功事件
+  'pay-success', // 触发支付成功事件
+  'trigger-alipay' // 触发支付状态事件
 ]);
 
 /**

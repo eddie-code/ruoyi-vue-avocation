@@ -25,11 +25,26 @@ export const calculateAmountApi = (videoId: string) => {
   });
 };
 
+/**
+ *
+ * @param data
+ */
 export const payApi = (data: PayForm) => {
   // 调用 request 方法发送请求
   return request({
     url: '/web/filetrans/pay',
     method: 'post',
     data: data
+  });
+};
+
+/**
+ * 新增订单状态查询接口
+ * @param orderNo
+ */
+export const queryOrderStatusApi = (orderNo: string) => {
+  return request({
+    url: `/web/order-info/query-order-status/${orderNo}`,
+    method: 'get'
   });
 };
