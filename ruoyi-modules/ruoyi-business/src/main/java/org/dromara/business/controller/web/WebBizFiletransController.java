@@ -7,6 +7,7 @@ import org.dromara.business.domain.bo.BizFiletransBo;
 import org.dromara.business.service.IBizFiletransService;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.web.core.BaseController;
+import org.dromara.order.domain.vo.OrderInfoPayVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,11 +31,11 @@ public class WebBizFiletransController extends BaseController {
     private final IBizFiletransService bizFiletransService;
 
     @PostMapping("/pay")
-    public R<Object> pay(@Valid @RequestBody BizFiletransBo req) throws Exception {
+    public R<OrderInfoPayVo> pay(@Valid @RequestBody BizFiletransBo req) throws Exception {
         log.info("语音识别支付开始");
-        String result = bizFiletransService.pay(req);
+        OrderInfoPayVo orderInfoPayVo =  bizFiletransService.pay(req);
         log.info("语音识别支付结束");
-        return R.ok(result);
+        return R.ok(orderInfoPayVo);
     }
 
 }

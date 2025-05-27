@@ -11,6 +11,7 @@ import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.order.alipay.impl.AliPayServiceImpl;
 import org.dromara.order.domain.OrderInfo;
 import org.dromara.order.domain.bo.OrderInfoBo;
+import org.dromara.order.domain.vo.OrderInfoPayVo;
 import org.dromara.order.enums.OrderInfoChannelEnum;
 import org.dromara.order.enums.OrderInfoStatusEnum;
 import org.dromara.order.mapper.OrderInfoMapper;
@@ -35,7 +36,7 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
     private final AliPayServiceImpl aliPayServiceImpl;
 
     @Override
-    public String pay(OrderInfoBo req) {
+    public OrderInfoPayVo pay(OrderInfoBo req) {
         Date now = new Date();
 
         OrderInfo orderInfo = new OrderInfo();
@@ -53,30 +54,27 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
         orderInfo.setChannelAt(null);
         orderInfo.setStatus(OrderInfoStatusEnum.I.getCode());
         orderInfo.setDesc(req.getDesc());
-//        orderInfo.setDelFlag();
         orderInfo.setTenantId(LoginHelper.getTenantId());
-//        orderInfo.setSearchValue();
-//        orderInfo.setCreateDept();
-//        orderInfo.setCreateBy();
-//        orderInfo.setCreateTime();
-//        orderInfo.setUpdateBy();
-//        orderInfo.setUpdateTime();
-//        orderInfo.setParams();
 
         validEntityBeforeSave(orderInfo);
         boolean flag = baseMapper.insert(orderInfo) > 0;
+        OrderInfoPayVo orderInfoPayVo = new OrderInfoPayVo();
+        // 如果之后需要扩展, 比如商品描述就在orderInfoPayVo增加字段，在这里set..
+
         if (flag) {
+            orderInfoPayVo.setOrderNo(orderNo);
             // 请求支付宝接口
             if (OrderInfoChannelEnum.ALIPAY.getCode().equals(req.getChannel())) {
                 // 调用支付宝下单接口
                 AlipayTradePagePayResponse response = aliPayServiceImpl.pay(req.getDesc(), orderNo, req.getAmount().toPlainString());
-                return response.getBody();
+                orderInfoPayVo.setChannelResult(response.getBody());
+                return orderInfoPayVo;
             } else {
                 log.warn("支付渠道【{}】不存在", req.getChannel());
                 throw new ServiceException(BusinessExceptionEnum.PAY_ERROR.getDesc());
             }
         }
-        return null;
+        return orderInfoPayVo;
     }
 
     private String genOrderNo() {

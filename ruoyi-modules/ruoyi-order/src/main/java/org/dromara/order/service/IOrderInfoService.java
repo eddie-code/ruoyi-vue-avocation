@@ -1,6 +1,7 @@
 package org.dromara.order.service;
 
 import org.dromara.order.domain.bo.OrderInfoBo;
+import org.dromara.order.domain.vo.OrderInfoPayVo;
 
 /**
  * 订单信息Service接口
@@ -10,6 +11,6 @@ import org.dromara.order.domain.bo.OrderInfoBo;
  */
 public interface IOrderInfoService {
 
-    String pay(OrderInfoBo req);
+    OrderInfoPayVo pay(OrderInfoBo req);
 
 }

@@ -14,6 +14,7 @@ import org.dromara.common.vod.enums.FiletransPayStatusEnum;
 import org.dromara.common.vod.enums.FiletransStatusEnum;
 import org.dromara.common.vod.util.VodUtil;
 import org.dromara.order.domain.bo.OrderInfoBo;
+import org.dromara.order.domain.vo.OrderInfoPayVo;
 import org.dromara.order.enums.OrderInfoOrderTypeEnum;
 import org.dromara.order.service.IOrderInfoService;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
     private final IOrderInfoService orderInfoService;
 
     @Override
-    public String pay(BizFiletransBo req) throws Exception {
+    public OrderInfoPayVo pay(BizFiletransBo req) throws Exception {
         // 获取视频信息
         GetVideoInfoResponse videoInfo = VodUtil.getVideoInfo(req.getVod());
         Float duration = videoInfo.getVideo().getDuration();
@@ -60,20 +61,6 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         bizFiletrans.setLang(req.getLang());
         bizFiletrans.setVod(req.getVod());
         bizFiletrans.setTaskId(req.getTaskId());
-//        bizFiletrans.setTransStatusCode();
-//        bizFiletrans.setTransStatusText();
-//        bizFiletrans.setTransTime();
-//        bizFiletrans.setSolveTime();
-
-//        bizFiletrans.setDelFlag();
-//        bizFiletrans.setTenantId(LoginHelper.getTenantId());
-//        bizFiletrans.setSearchValue();
-//        bizFiletrans.setCreateDept();
-//        bizFiletrans.setCreateBy();
-//        bizFiletrans.setCreateTime();
-//        bizFiletrans.setUpdateBy();
-//        bizFiletrans.setUpdateTime();
-//        bizFiletrans.setParams();
 
         boolean flag = baseMapper.insert(bizFiletrans) > 0;
         if (flag) {

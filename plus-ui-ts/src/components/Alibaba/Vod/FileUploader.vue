@@ -173,7 +173,7 @@ const handlePay = () => {
       if (response.code === 200) {
         notification.success({
           message: '系统提示',
-          description: '下单成功'
+          description: '下单成功, 订单号：' + response.data.orderNo
         });
         emit('pay-success'); // 可选：触发支付成功事件
         // 处理支付宝返回的表单
@@ -183,7 +183,7 @@ const handlePay = () => {
         }
         const div = document.createElement('divform');
         // 支付宝返回的form
-        div.innerHTML = response.msg;
+        div.innerHTML = response.data.channelResult;
         document.body.appendChild(div);
         document.forms[0].setAttribute('target', '_blank');
         document.forms[0].submit();
@@ -235,7 +235,8 @@ const handleFileChange = () => {
     lang: "",
     audioAddr: "",
     fileSign: "",
-    vod: ""
+    vod: "",
+    channel: ""
   };
 
   // 生成文件唯一标识
