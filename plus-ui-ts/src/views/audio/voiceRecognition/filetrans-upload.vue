@@ -29,7 +29,14 @@
         <a-select-option v-for="o in FILETRANS_LANG_ARRAY" :value="o.code">{{o.desc}}</a-select-option>
       </a-select>
     </p>
-
+    <!-- 添加支付方式选择 -->
+    <p>
+      支付方式：
+      <a-radio-group name="radioGroup" v-model:value="channel">
+        <a-radio value="A"><img src="/image/alipay.jpg" alt="支付宝" style="height: 50px;"/></a-radio>
+        <a-radio value="W"><img src="/image/wechatpay.jpg" alt="微信" style="height: 100px;"/></a-radio>
+      </a-radio-group>
+    </p>
     <!-- 模态框其他内容 -->
     <p>支持格式：.mp3, .wav, .m4a，最大500MB</p>
   </a-modal>
@@ -51,7 +58,10 @@ const formatAmount = (amount: string) => {
   });
 };
 
-
+/**
+ * 添加支付方式响应式变量
+ */
+const channel = ref<string>('A'); // 默认支付宝
 /**
  * 控制模态框显示/隐藏的状态
  */
@@ -120,6 +130,7 @@ const pay = (e: MouseEvent) => {
   // 同步语言到FileUploader组件
   if (fileUploader.value) {
     fileUploader.value.filetrans.lang = lang.value;
+    fileUploader.value.filetrans.channel = channel.value; // 传递支付方式
   }
 
   // 合并 filetrans 和 lang 到新对象

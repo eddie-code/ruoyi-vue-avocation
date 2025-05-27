@@ -33,7 +33,8 @@ const filetrans = ref({
   lang: "",
   audioAddr: "",
   fileSign: "",
-  vod: ""
+  vod: "",
+  channel: "A" // 默认值, 支付宝
 });
 
 /**
@@ -48,7 +49,8 @@ const resetFileTrans = () => {
     lang: "",
     audioAddr: "",
     fileSign: "",
-    vod: ""
+    vod: "",
+    channel: "A" // 默认值, 支付宝
   };
   if (fileUploadCom.value) {
     fileUploadCom.value.value = '';
@@ -160,7 +162,7 @@ const handlePay = () => {
     audio: filetrans.value.audioAddr,
     fileSign: filetrans.value.fileSign,
     vod: filetrans.value.vod,
-    channel: 'A' // 默认支付宝
+    channel: filetrans.value.channel // 使用从父组件传递过来的channel
   };
 
   console.log('下单请求数据:', payData); // 调试日志

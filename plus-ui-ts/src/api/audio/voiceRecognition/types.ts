@@ -60,6 +60,10 @@ export interface FileItem {
    * videoId
    */
   vod: string;
+  /**
+   * 支付渠道
+   */
+  channel: string;
 }
 
 /**
