@@ -123,3 +123,17 @@ public AlipayTradePagePayResponse pay(String subject, String outTradeNo, String 
     }
 }
 ```
+
+### 甲蛙内网穿透在线工具（不需要安装，只需要注册即可）
+
+* [甲蛙内网穿透在线工具](http://callback.jiawablog.com/)
+* 登录 > 配置
+  * 复制：（回调地址，将该地址配置到你的项目中） http://callback.jiawablog.com/callback/582762149093445632 填入配置里面
+  * 输入：本地回调地址
+* 浏览器
+  * Chrome浏览器需要改配置, 输入：`chrome://flags` 页面来启用或禁用“block insecure private network requests”功能
+  * Firefox浏览器需要改配置, 输入：`about:config` 
+    * 在搜索栏输入以下参数：
+      * `network.http.referer.disallowCrossSiteRelaxingDefault`   true 改为 false
+      * `security.mixed_content.block_active_content`   值为 false
+      * `network.cors_preflight.allow_private_network_access`    布尔 == true

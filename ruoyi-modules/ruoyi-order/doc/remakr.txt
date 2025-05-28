@@ -30,3 +30,12 @@ https://b.alipay.com/page/home
 
 （需要配置）支付宝 - 商家平台 > 账号中心 > 绑定 > APPID绑定
 https://b.alipay.com/page/account-manage-oc/bind/appIdBindList
+
+甲蛙内网穿透在线工具
+http://callback.jiawablog.com/
+
+异步通知说明
+https://opendocs.alipay.com/open/0c2c19?pathHash=df12a335
+
+【官方工具】异步通知查询工具使用指南
+https://open.alipay.com/portal/forum/post/187201019
