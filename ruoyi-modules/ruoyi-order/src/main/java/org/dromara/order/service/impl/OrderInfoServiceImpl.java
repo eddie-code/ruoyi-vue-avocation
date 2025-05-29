@@ -2,6 +2,7 @@ package org.dromara.order.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -13,11 +14,13 @@ import org.dromara.common.dependency.order.domain.OrderInfo;
 import org.dromara.common.dependency.order.domain.bo.OrderInfoBo;
 import org.dromara.common.dependency.order.domain.vo.OrderInfoPayVo;
 import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.order.alipay.IAfterPayService;
 import org.dromara.order.alipay.IAliPayService;
 import org.dromara.common.dependency.order.enums.OrderInfoChannelEnum;
 import org.dromara.common.dependency.order.enums.OrderInfoStatusEnum;
 import org.dromara.order.mapper.OrderInfoMapper;
 import org.dromara.common.dependency.order.api.IOrderInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.dromara.common.core.utils.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -38,8 +41,15 @@ import java.util.Map;
 public class OrderInfoServiceImpl implements IOrderInfoService {
 
     private final OrderInfoMapper baseMapper;
-
     private final IAliPayService aliPayService;
+
+    // 移除外部的 @Autowired，改为 setter 注入
+    private IAfterPayService afterPayService;
+
+    @Autowired
+    public void setAfterPayService(IAfterPayService afterPayService) {
+        this.afterPayService = afterPayService;
+    }
 
     @Override
     public OrderInfoPayVo pay(OrderInfoBo req) {
@@ -86,6 +96,25 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
     @Override
     public String queryOrderStatus(String orderNo) {
         OrderInfo orderInfo = this.selectByOrderNo(orderNo);
+        // 全链路查询
+        // 检查订单信息状态是否为初始化状态
+        if (OrderInfoStatusEnum.I.getCode().equals(orderInfo.getStatus())) {
+            // 进一步检查订单信息渠道是否为支付宝
+            if (OrderInfoChannelEnum.ALIPAY.getCode().equals(orderInfo.getChannel())) {
+                // 调用支付宝服务查询订单状态
+                AlipayTradeQueryResponse response = aliPayService.query(orderNo);
+                String tradeStatus = response.getTradeStatus();
+                // 检查交易状态是否为成功或完成
+                if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
+                    String sendPayDate = response.getSendPayDate();
+                    Date date = DateUtil.parse(sendPayDate, "yyyy-MM-dd HH:mm:ss");
+                    // 在支付成功后进行后续处理
+                    afterPayService.afterPaySuccess(orderNo, date);
+                    // 返回订单成功状态码
+                    return OrderInfoStatusEnum.S.getCode();
+                }
+            }
+        }
         return orderInfo.getStatus();
     }
 

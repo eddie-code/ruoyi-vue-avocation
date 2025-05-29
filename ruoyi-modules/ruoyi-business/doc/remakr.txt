@@ -9,3 +9,12 @@ https://help.aliyun.com/zh/vod/developer-reference/upload-sdk-for-javascript?spm
 
 智能语音交互
 https://nls-portal.console.aliyun.com/overview
+
+首页 > 智能语音交互 > 开发参考 > 语音识别 > 录音文件识别
+https://help.aliyun.com/zh/isi/developer-reference/recording-file-recognition/?spm=a2c4g.11186623.help-menu-30413.d_3_2_2.7dc124793geSm7
+
+首页 > 智能语音交互 > 开发参考 > 语音识别 > 录音文件识别 > 调用示例 > Java Demo
+https://help.aliyun.com/zh/isi/developer-reference/sdk-for-java-10?spm=a2c4g.11186623.help-menu-30413.d_3_2_2_1_0.220d2479P1WvWq
+
+RAM 访问控制 > 用户
+https://ram.console.aliyun.com/users

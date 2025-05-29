@@ -13,6 +13,7 @@ import org.dromara.common.dependency.order.domain.bo.OrderInfoBo;
 import org.dromara.common.dependency.order.domain.vo.OrderInfoPayVo;
 import org.dromara.common.dependency.order.enums.OrderInfoOrderTypeEnum;
 import org.dromara.common.json.utils.JsonUtils;
+import org.dromara.common.nls.util.NlsUtil;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.vod.enums.FiletransPayStatusEnum;
 import org.dromara.common.vod.enums.FiletransStatusEnum;
@@ -96,6 +97,11 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         filetrans.setStatus(FiletransStatusEnum.SUBTITLE_INIT.getCode());
 //        filetrans.setUpdatedAt(now);
         baseMapper.updateById(filetrans);
+
+        // 发起语音识别任务
+        BizFiletrans bizFiletrans = baseMapper.selectById(id);
+        NlsUtil.trans(filetrans.getAudio(), bizFiletrans.getLang());
+
     }
 
     /**

@@ -179,7 +179,7 @@
                 <version>${revision}</version>
             </dependency>
 
-            <!-- Business模块 -->
+            <!-- Vod模块 -->
             <dependency>
                 <groupId>org.dromara</groupId>
                 <artifactId>ruoyi-common-vod</artifactId>
@@ -190,6 +190,13 @@
             <dependency>
                 <groupId>org.dromara</groupId>
                 <artifactId>ruoyi-common-dependency</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- NLS模块 -->
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-common-nls</artifactId>
                 <version>${revision}</version>
             </dependency>
 

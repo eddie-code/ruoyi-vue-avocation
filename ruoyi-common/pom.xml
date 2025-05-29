@@ -37,6 +37,7 @@
         <module>ruoyi-common-vod</module>
         <module>ruoyi-common-fe-enum</module>
         <module>ruoyi-common-dependency</module>
+        <module>ruoyi-common-nls</module>
     </modules>
 
     <artifactId>ruoyi-common</artifactId>

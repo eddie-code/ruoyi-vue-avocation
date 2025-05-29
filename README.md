@@ -304,3 +304,153 @@ org.dromara.order.config.OrderAutoConfiguration
   - 通过`甲蛙内网穿透在线工具`会多出一条数据, 手动请求本地, 后台会根据 `/alipay/callback` 接口修改 order_info 表的状态 I > S
     - （为什么不会自动完成？ 因为alipay.notifyUrl这个配置设置了甲蛙的地址为通知URL）
   - 然后Web项目页面就会自动退出支付模态框, 停止后台查询支付状态
+
+### feat(nls): 12.2 添加智能语音交互（NLS）功能
+
+- 新增 NlsFiletransProperties 配置类，用于阿里云智能语音服务文件传输属性配置
+- 添加 NlsUtil 工具类，实现录音文件识别和结果查询功能
+- 在 ruoyi-common 中引入 nls 模块，并更新相关依赖
+- 在 ruoyi-business 中添加对 nls 模块的使用 （支付成功后处理，发起语音识别任务）
+- 优化 ruoyi-order 中的支付流程，支持全链路查询，在异步通知没收到的情况下，可以通过方法查询获取支付结果
+
+#### 解决循环依赖问题
+
+##### springboot <=2.6 以下版本可用，本项目使用无效，版本 > 3.x
+
+```yaml
+--- # 打破循环依赖引入
+spring:
+  main:
+    allow-circular-references: true
+```
+
+##### 本次出现依赖问题的类
+
+```text
+webBizFiletransController （不需要改动）
+    ↓
+bizFiletransServiceImpl  （不需要改动）
+    ↓
+orderInfoServiceImpl  (为循环依赖改动)
+    ↓
+afterPayServiceImpl   (为循环依赖改动)
+    ↑
+    └── bizFiletransServiceImpl (需要闭环)
+```
+
+问题根源在于：
+1. bizFiletransServiceImpl 依赖 orderInfoServiceImpl
+2. orderInfoServiceImpl 依赖 afterPayServiceImpl
+3. afterPayServiceImpl 又依赖 bizFiletransServiceImpl
+
+##### 修改 OrderInfoServiceImpl
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class OrderInfoServiceImpl implements IOrderInfoService {
+
+    private final OrderInfoMapper baseMapper;
+    private final IAliPayService aliPayService;
+
+    // 移除外部的 @Autowired，改为 setter 注入
+    private IAfterPayService afterPayService;
+
+    @Autowired
+    public void setAfterPayService(IAfterPayService afterPayService) {
+        this.afterPayService = afterPayService;
+    }
+    // ... 其他代码不变 ...
+}
+```
+
+##### 修改 AfterPayServiceImpl
+
+```java
+@Slf4j
+@Service
+public class AfterPayServiceImpl implements IAfterPayService, ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
+
+    @Resource
+    private IOrderInfoService orderInfoService;
+
+    // 移除外部的 @Resource，改为延迟获取
+//    @Resource
+//    private IBizFiletransService filetransService;
+
+    @Override
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    // 延迟获取 filetransService
+    private IBizFiletransService getFiletransService() {
+        return applicationContext.getBean(IBizFiletransService.class);
+    }
+
+    /**
+     * 支付成功后的处理方法
+     * 在订单支付成功后，更新订单状态和相关记录
+     *
+     * @param orderNo     订单号
+     * @param channelTime 渠道时间
+     */
+    @Transactional
+    @Override
+    public void afterPaySuccess(String orderNo, Date channelTime) {
+        // 记录支付成功处理开始日志
+        log.info("执行支付成功动作开始");
+
+        // 校验订单是否存在
+        OrderInfo orderInfo = orderInfoService.selectByOrderNo(orderNo);
+        if (orderInfo.equals(new OrderInfo())) {
+            // 如果订单不存在，记录错误日志并返回
+            log.error("订单不存在，{}", orderNo);
+            return;
+        }
+
+        // 将订单更新成S
+        log.info("更新订单信息开始");
+        int i = orderInfoService.afterPaySuccess(orderNo, channelTime);
+        if (i == 0) {
+            // 如果订单状态不是初始状态，记录错误日志并返回
+            log.error("订单状态异常，订单状态非初始，{}，结束", orderNo);
+            return;
+        }
+
+        // 根据订单类型进行后续处理
+        if (orderInfo.getOrderType().equals(OrderInfoOrderTypeEnum.FILETRANS_PAY.getCode())) {
+            // 如果是语音识别单次付费订单，将语音识别记录更新成SI
+            log.info("语音识别单次付费，更新语音识别表状态");
+
+            String info = orderInfo.getInfo();
+            Map<String, Object> infoMap = JsonUtils.parseObject(info, Map.class);
+            String idStr = (String) infoMap.get("id"); // 注意类型是否为 String
+            Long filetransId = Long.valueOf(idStr);
+
+            // 使用延迟获取的方式， 屏蔽 filetransService.afterPaySuccess(filetransId);
+            getFiletransService().afterPaySuccess(filetransId);
+        }
+
+        // 记录支付成功处理结束日志
+        log.info("执行支付成功动作结束");
+    }
+}
+```
+
+##### 关键修改说明
+
+（1）完全移除字段注入：
+* 移除了 AfterPayServiceImpl 中的 @Resource private IBizFiletransService filetransService
+* 为通过 ApplicationContext 延迟获取 IBizFiletransService
+
+（2）双重延迟加载：
+* 同时延迟加载 IOrderInfoService 和 IBizFiletransService
+* 通过 getOrderInfoService() 和 getFiletransService() 方法在需要时获取 Bean
+
+（3）保持业务逻辑不变：
+* 所有业务逻辑保持不变，只是改变了依赖获取方式
+* 延迟加载确保在 Bean 初始化完成后才获取依赖

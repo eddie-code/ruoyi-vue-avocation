@@ -1,6 +1,7 @@
 package org.dromara.order.config;
 
 import org.dromara.common.dependency.order.api.IOrderInfoService;
+import org.dromara.order.alipay.IAfterPayService;
 import org.dromara.order.alipay.IAliPayService;
 import org.dromara.order.mapper.OrderInfoMapper;
 import org.dromara.order.service.impl.OrderInfoServiceImpl;

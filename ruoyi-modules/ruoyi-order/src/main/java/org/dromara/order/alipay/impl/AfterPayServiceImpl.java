@@ -8,6 +8,10 @@ import org.dromara.order.alipay.IAfterPayService;
 import org.dromara.common.dependency.order.domain.OrderInfo;
 import org.dromara.common.dependency.order.enums.OrderInfoOrderTypeEnum;
 import org.dromara.common.dependency.order.api.IOrderInfoService;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,19 +27,40 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class AfterPayServiceImpl implements IAfterPayService {
+public class AfterPayServiceImpl implements IAfterPayService, ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
 
     @Resource
     private IOrderInfoService orderInfoService;
 
-    @Resource
-    private IBizFiletransService filetransService;
+    // 移除外部的 @Resource，改为延迟获取
+//    @Resource
+//    private IBizFiletransService filetransService;
+
+    @Override
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    // 延迟获取 filetransService
+    private IBizFiletransService getFiletransService() {
+        return applicationContext.getBean(IBizFiletransService.class);
+    }
+
+    // 延迟获取 orderInfoService
+    private IOrderInfoService getOrderInfoService() {
+        if (this.orderInfoService == null) {
+            this.orderInfoService = applicationContext.getBean(IOrderInfoService.class);
+        }
+        return this.orderInfoService;
+    }
 
     /**
      * 支付成功后的处理方法
      * 在订单支付成功后，更新订单状态和相关记录
      *
-     * @param orderNo 订单号
+     * @param orderNo     订单号
      * @param channelTime 渠道时间
      */
     @Transactional
@@ -45,7 +70,7 @@ public class AfterPayServiceImpl implements IAfterPayService {
         log.info("执行支付成功动作开始");
 
         // 校验订单是否存在
-        OrderInfo orderInfo = orderInfoService.selectByOrderNo(orderNo);
+        OrderInfo orderInfo = getOrderInfoService().selectByOrderNo(orderNo);
         if (orderInfo.equals(new OrderInfo())) {
             // 如果订单不存在，记录错误日志并返回
             log.error("订单不存在，{}", orderNo);
@@ -54,7 +79,7 @@ public class AfterPayServiceImpl implements IAfterPayService {
 
         // 将订单更新成S
         log.info("更新订单信息开始");
-        int i = orderInfoService.afterPaySuccess(orderNo, channelTime);
+        int i = getOrderInfoService().afterPaySuccess(orderNo, channelTime);
         if (i == 0) {
             // 如果订单状态不是初始状态，记录错误日志并返回
             log.error("订单状态异常，订单状态非初始，{}，结束", orderNo);
@@ -71,12 +96,11 @@ public class AfterPayServiceImpl implements IAfterPayService {
             String idStr = (String) infoMap.get("id"); // 注意类型是否为 String
             Long filetransId = Long.valueOf(idStr);
 
-            filetransService.afterPaySuccess(filetransId);
+            // 使用延迟获取的方式， 屏蔽 filetransService.afterPaySuccess(filetransId);
+            getFiletransService().afterPaySuccess(filetransId);
         }
 
         // 记录支付成功处理结束日志
         log.info("执行支付成功动作结束");
     }
-
-
 }

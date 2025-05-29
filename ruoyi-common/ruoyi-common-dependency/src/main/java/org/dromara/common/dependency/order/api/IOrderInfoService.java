@@ -24,7 +24,7 @@ public interface IOrderInfoService {
     OrderInfoPayVo pay(OrderInfoBo req);
 
     /**
-     * 查询本地订单的状态并返回
+     * 查询本地订单的状态并返回, 并且提供前端两秒钟查询一次
      *
      * @param orderNo 订单编号，用于标识特定的订单
      * @return 返回订单的当前状态，例如待支付、已支付、取消等

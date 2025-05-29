@@ -187,7 +187,7 @@ sms:
       signature: 您的短信签名
       sdk-app-id: 您的sdkAppId
 
---- # vod 阿里云
+--- # 阿里云-视频点播服务（VOD）
 vod:
   accessKeyId: ${ALI_VOD_ACCESS_KEY_ID:LTAI5tV5qrL}
   accessKeySecret: ${ALI_VOD_ACCESS_KEY_SECRET:lWb9DBMjF23dJ}
@@ -197,7 +197,7 @@ filetrans:
   audio:
     price: 0.2  # 正确配置，值为 0.2
 
-# 支付宝支付
+--- # 支付宝支付
 # 沙箱环境：https://open.alipay.com/develop/sandbox/app?is_switch_sandbox=true
 alipay:
   # 应用信息 > 开发信息 > 接口加签方式 > 系统默认密钥 > 公钥模式 > 查看 > 支付宝公钥:
@@ -214,6 +214,19 @@ alipay:
   notifyUrl: http://callback.jiawablog.com/callback/582762149093445632
   # 支付成功后跳转的页面
 #  returnUrl: https://www.baidu.com/
+
+--- # 阿里云-智能语音交互（NLS）
+nls:
+  filetrans:
+    accessKeyId: ${ALI_VOD_ACCESS_KEY_ID:LTAI5tV5qrL}
+    accessKeySecret: ${ALI_VOD_ACCESS_KEY_SECRET:lWb9DBMjF23dJ}
+    callback: http://callback.jiawablog.com/callback/582762149093445632
+    domain: filetrans.cn-shanghai.aliyuncs.com
+    endpointName: cn-shanghai
+    regionId: cn-shanghai
+    product: nls-filetrans
+    taskVersion: 4.0
+    version: '2018-08-17'
 
 --- # 三方授权
 justauth:

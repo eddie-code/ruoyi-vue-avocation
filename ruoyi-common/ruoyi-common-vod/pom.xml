@@ -10,7 +10,7 @@
     <artifactId>ruoyi-common-vod</artifactId>
 
     <description>
-        common-vod模块
+        common-vod模块-视频点播服务
     </description>
 
     <dependencies>
