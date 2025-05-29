@@ -129,6 +129,11 @@
             <artifactId>ruoyi-business</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-order</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

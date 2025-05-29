@@ -186,6 +186,13 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- Dependency模块 -->
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-common-dependency</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

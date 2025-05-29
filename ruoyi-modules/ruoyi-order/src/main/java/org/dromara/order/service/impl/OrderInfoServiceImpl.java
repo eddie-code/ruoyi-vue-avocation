@@ -9,16 +9,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.enums.BusinessExceptionEnum;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.dependency.order.domain.OrderInfo;
+import org.dromara.common.dependency.order.domain.bo.OrderInfoBo;
+import org.dromara.common.dependency.order.domain.vo.OrderInfoPayVo;
 import org.dromara.common.satoken.utils.LoginHelper;
-import org.dromara.order.alipay.impl.AliPayServiceImpl;
-import org.dromara.order.domain.OrderInfo;
-import org.dromara.order.domain.bo.OrderInfoBo;
-import org.dromara.order.domain.vo.OrderInfoPayVo;
-import org.dromara.order.domain.vo.OrderInfoVo;
-import org.dromara.order.enums.OrderInfoChannelEnum;
-import org.dromara.order.enums.OrderInfoStatusEnum;
+import org.dromara.order.alipay.IAliPayService;
+import org.dromara.common.dependency.order.enums.OrderInfoChannelEnum;
+import org.dromara.common.dependency.order.enums.OrderInfoStatusEnum;
 import org.dromara.order.mapper.OrderInfoMapper;
-import org.dromara.order.service.IOrderInfoService;
+import org.dromara.common.dependency.order.api.IOrderInfoService;
 import org.springframework.stereotype.Service;
 import org.dromara.common.core.utils.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +39,7 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
 
     private final OrderInfoMapper baseMapper;
 
-    private final AliPayServiceImpl aliPayServiceImpl;
+    private final IAliPayService aliPayService;
 
     @Override
     public OrderInfoPayVo pay(OrderInfoBo req) {
@@ -73,7 +72,7 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
             // 请求支付宝接口
             if (OrderInfoChannelEnum.ALIPAY.getCode().equals(req.getChannel())) {
                 // 调用支付宝下单接口
-                AlipayTradePagePayResponse response = aliPayServiceImpl.pay(req.getDesc(), orderNo, req.getAmount().toPlainString());
+                AlipayTradePagePayResponse response = aliPayService.pay(req.getDesc(), orderNo, req.getAmount().toPlainString());
                 orderInfoPayVo.setChannelResult(response.getBody());
                 return orderInfoPayVo;
             } else {
@@ -90,6 +89,7 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
         return orderInfo.getStatus();
     }
 
+    @Override
     public OrderInfo selectByOrderNo(String orderNo) {
         OrderInfoBo orderInfoBo = new OrderInfoBo();
         orderInfoBo.setOrderNo(orderNo);
@@ -101,6 +101,26 @@ public class OrderInfoServiceImpl implements IOrderInfoService {
         }
         return list.get(0);
     }
+    @Override
+    public int afterPaySuccess(String orderNo, Date channelTime) {
+        // 只更新以下实体字段
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setStatus(OrderInfoStatusEnum.S.getCode());
+        // 设置渠道时间，即支付成功的时间
+        orderInfo.setChannelAt(channelTime);
+        //orderInfo.setUpdateTime(new Date());
+
+        // 符合更新条件
+        OrderInfoBo bo = new OrderInfoBo();
+        bo.setOrderNo(orderNo);
+        bo.setStatus(OrderInfoStatusEnum.I.getCode()); // 在并发场景下，这个状态起到乐观锁作用，因为订单号+I条件才能更新
+
+        // 构建查询包装器，用于查询待更新的订单信息
+        LambdaQueryWrapper<OrderInfo> lqw = buildQueryWrapper(bo);
+        // 执行更新操作，返回影响的行数
+        return baseMapper.update(orderInfo, lqw);
+    }
+
 
     private String genOrderNo() {
         String no = DateUtil.format(new Date(), "yyyyMMddHHmmssSSS");

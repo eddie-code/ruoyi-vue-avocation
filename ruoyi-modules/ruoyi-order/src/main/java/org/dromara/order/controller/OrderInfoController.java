@@ -2,7 +2,7 @@ package org.dromara.order.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
-import org.dromara.order.service.IOrderInfoService;
+import org.dromara.common.dependency.order.api.IOrderInfoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.dromara.common.web.core.BaseController;

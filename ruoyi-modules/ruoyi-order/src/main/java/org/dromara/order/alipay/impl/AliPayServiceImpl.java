@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.enums.BusinessExceptionEnum;
 import org.dromara.common.core.exception.ServiceException;
-import org.dromara.order.alipay.AliPayProperties;
+import org.dromara.order.config.AliPayProperties;
 import org.dromara.order.alipay.IAliPayService;
 import org.springframework.stereotype.Service;
 

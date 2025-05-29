@@ -137,3 +137,158 @@ public AlipayTradePagePayResponse pay(String subject, String outTradeNo, String 
       * `network.http.referer.disallowCrossSiteRelaxingDefault`   true 改为 false
       * `security.mixed_content.block_active_content`   值为 false
       * `network.cors_preflight.allow_private_network_access`    布尔 == true
+
+### 项目存在循环依赖问题, [ruoyi-order](ruoyi-modules/ruoyi-order) 与 [ruoyi-business](ruoyi-modules/ruoyi-business)
+
+#### 思路图
+
+```mermaid
+sequenceDiagram
+participant O as ruoyi-order
+participant C as ruoyi-common-dependency
+participant B as ruoyi-business
+O->>C: 调用IBizFiletransService接口
+C->>B: 路由到BizFiletransServiceImpl实现
+B-->>C: 返回结果
+C-->>O: 返回结果
+```
+
+`mermaid图需要安装插件`
+
+
+#### 解决循环依赖的方案
+
+在 ruoyi-common-dependency 中定义共享的 API 接口和实体类，将两个模块之间的依赖关系提取到公共模块中，从而达到`完全解耦`,`可维护性`
+
+##### 具体步骤：
+
+###### 1. 创建共享模块
+
+(1). 在 ruoyi-common-dependency 中创建共享包结构：
+
+```text
+com.ruoyi.common.dependency
+├── order
+│   ├── api
+│   │    └──  IOrderInfoService
+│   └── domain
+│   └── enums
+└── business
+    ├── api
+    │    └──  IBizFiletransService
+    └── domain
+```
+
+`将原来 ruoyi-order 和 ruoyi-business 的实体、枚举、IOrderInfoService业务接口、IBizFiletransService业务接口迁移到 ruoyi-common-dependency, 其余没有循环调用的业务层依旧存放在原来的目录里面`
+
+##### 2. 修改模块依赖
+
+(1). ruoyi-order 的 pom.xml:
+
+```xml
+<dependency>
+    <groupId>com.ruoyi</groupId>
+    <artifactId>ruoyi-common-dependency</artifactId>
+</dependency>
+    <!-- 移除对 ruoyi-order 的直接依赖 -->
+```
+
+(2). ruoyi-business 的 pom.xml:
+
+```xml
+<dependency>
+    <groupId>com.ruoyi</groupId>
+    <artifactId>ruoyi-common-dependency</artifactId>
+</dependency>
+<!-- 移除对 ruoyi-business 的直接依赖 -->
+```
+
+##### 3. 修改代码实现
+
+举例：修改 AfterPayServiceImpl、BizFiletransServiceImpl 的包引入路径：
+
+```java
+//# AfterPayServiceImpl
+import com.ruoyi.common.dependency.api.business.IBizFiletransService;
+
+//# BizFiletransServiceImpl
+import com.ruoyi.common.dependency.api.business.IBizFiletransService;
+```
+
+`当然, 还有BO、VO、Enums等的引用需要修改路径, 不再一一描述`
+
+##### 4. 自动配置类
+
+(1) org/dromara/order/config/OrderAutoConfiguration.java
+
+```java
+@AutoConfiguration
+@ConditionalOnClass(IOrderInfoService.class)
+public class OrderAutoConfiguration {
+
+    // 根据 OrderInfoServiceImpl 引用而添加
+    private final OrderInfoMapper orderInfoMapper;
+    private final IAliPayService aliPayService;
+
+    public OrderAutoConfiguration(OrderInfoMapper orderInfoMapper, IAliPayService aliPayService) {
+        this.orderInfoMapper = orderInfoMapper;
+        this.aliPayService = aliPayService;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IOrderInfoService orderInfoService() {
+        return new OrderInfoServiceImpl(orderInfoMapper, aliPayService);
+    }
+}
+```
+
+(2) org/dromara/business/config/BusinessAutoConfiguration.java
+
+```java
+@AutoConfiguration
+@ConditionalOnClass(IBizFiletransService.class)
+public class BusinessAutoConfiguration {
+
+    // 根据 BizFiletransServiceImpl 引用而添加
+    private final BizFiletransMapper filetransMapper;
+    private final IOrderInfoService orderInfoService;
+
+    public BusinessAutoConfiguration(BizFiletransMapper filetransMapper, IOrderInfoService orderInfoService) {
+        this.filetransMapper = filetransMapper;
+        this.orderInfoService = orderInfoService;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IBizFiletransService filetransService() {
+        return new BizFiletransServiceImpl(filetransMapper, orderInfoService);
+    }
+}
+```
+
+
+###### 4.1 自动装配
+
+```text
+src/
+└── main/
+    └── resources/
+        └── META-INF/
+            ├── spring.factories               # Spring Boot < 2.7
+            └── spring/
+                └── org.springframework.boot.autoconfigure.AutoConfiguration.imports # Spring Boot ≥ 2.7
+```
+
+现有springboot版本3.4.4, 故此使用如下：
+
+```text
+# [ruoyi-business](ruoyi-modules/ruoyi-business)
+# src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+org.dromara.business.config.BusinessAutoConfiguration
+
+# [ruoyi-order](ruoyi-modules/ruoyi-order)
+# src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+org.dromara.order.config.OrderAutoConfiguration
+```
+

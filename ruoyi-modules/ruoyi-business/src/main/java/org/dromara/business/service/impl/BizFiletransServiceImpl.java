@@ -4,19 +4,19 @@ import cn.hutool.core.util.IdUtil;
 import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.business.domain.BizFiletrans;
-import org.dromara.business.domain.bo.BizFiletransBo;
 import org.dromara.business.mapper.BizFiletransMapper;
-import org.dromara.business.service.IBizFiletransService;
+import org.dromara.common.dependency.business.api.IBizFiletransService;
+import org.dromara.common.dependency.business.domain.BizFiletrans;
+import org.dromara.common.dependency.business.domain.bo.BizFiletransBo;
+import org.dromara.common.dependency.order.api.IOrderInfoService;
+import org.dromara.common.dependency.order.domain.bo.OrderInfoBo;
+import org.dromara.common.dependency.order.domain.vo.OrderInfoPayVo;
+import org.dromara.common.dependency.order.enums.OrderInfoOrderTypeEnum;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.vod.enums.FiletransPayStatusEnum;
 import org.dromara.common.vod.enums.FiletransStatusEnum;
 import org.dromara.common.vod.util.VodUtil;
-import org.dromara.order.domain.bo.OrderInfoBo;
-import org.dromara.order.domain.vo.OrderInfoPayVo;
-import org.dromara.order.enums.OrderInfoOrderTypeEnum;
-import org.dromara.order.service.IOrderInfoService;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -82,6 +82,20 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         orderInfoPayReq.setDesc("语音识别付费");
 
         return orderInfoService.pay(orderInfoPayReq);
+    }
+
+    /**
+     * 支付成功后处理
+     */
+    @Override
+    public void afterPaySuccess(Long id) {
+//        Date now = new Date();
+        BizFiletrans filetrans = new BizFiletrans();
+        filetrans.setId(id);
+        filetrans.setPayStatus(FiletransPayStatusEnum.S.getCode()); // 支付成功
+        filetrans.setStatus(FiletransStatusEnum.SUBTITLE_INIT.getCode());
+//        filetrans.setUpdatedAt(now);
+        baseMapper.updateById(filetrans);
     }
 
     /**

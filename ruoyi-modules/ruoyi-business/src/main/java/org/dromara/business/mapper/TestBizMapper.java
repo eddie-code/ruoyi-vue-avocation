@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
-import org.dromara.business.domain.TestBiz;
-import org.dromara.business.domain.vo.TestBizVo;
+import org.dromara.common.dependency.business.domain.TestBiz;
+import org.dromara.common.dependency.business.domain.vo.TestBizVo;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 
 /**

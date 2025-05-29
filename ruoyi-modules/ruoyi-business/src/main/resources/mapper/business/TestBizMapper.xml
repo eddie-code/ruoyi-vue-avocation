@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.dromara.business.mapper.TestBizMapper">
 
-    <select id="customPageList" resultType="org.dromara.business.domain.vo.TestBizVo">
+    <select id="customPageList" resultType="org.dromara.common.dependency.business.domain.vo.TestBizVo">
         SELECT * FROM test ${ew.customSqlSegment}
     </select>
 </mapper>

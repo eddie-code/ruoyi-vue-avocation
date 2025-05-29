@@ -1,7 +1,7 @@
 package org.dromara.business.service;
 
-import org.dromara.business.domain.bo.TestBizBo;
-import org.dromara.business.domain.vo.TestBizVo;
+import org.dromara.common.dependency.business.domain.bo.TestBizBo;
+import org.dromara.common.dependency.business.domain.vo.TestBizVo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 

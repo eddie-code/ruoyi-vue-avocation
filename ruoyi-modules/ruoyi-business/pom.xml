@@ -111,7 +111,7 @@
 
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-order</artifactId>
+            <artifactId>ruoyi-common-dependency</artifactId>
         </dependency>
 
 

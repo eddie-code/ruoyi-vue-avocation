@@ -5,7 +5,7 @@ import com.alipay.api.internal.util.AlipaySignature;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.order.alipay.AliPayProperties;
+import org.dromara.order.config.AliPayProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +21,9 @@ public class AliPayController {
 
     @Resource
     private AliPayProperties aliPayProperties;
+
+    @Resource
+//    private IAfterPayService afterPayService;
 
     @Value("${spring.profiles.active:}")
     private String activeProfile;
@@ -91,6 +94,7 @@ public class AliPayController {
                 //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
 
                 log.info("支付成功后的处理");
+//                afterPayService.afterPaySuccess(outTradeNo, channelTime);
             }
 
             //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——

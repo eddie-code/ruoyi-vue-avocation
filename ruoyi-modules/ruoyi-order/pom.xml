@@ -103,6 +103,11 @@
             <artifactId>ruoyi-common-websocket</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-common-dependency</artifactId>
+        </dependency>
+
         <!-- 支付宝支付 Easy版SDK -->
         <dependency>
             <groupId>com.alipay.sdk</groupId>

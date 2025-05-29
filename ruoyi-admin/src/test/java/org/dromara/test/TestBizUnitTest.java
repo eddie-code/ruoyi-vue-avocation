@@ -1,9 +1,9 @@
 package org.dromara.test;
 
-import org.dromara.business.domain.TestBiz;
-import org.dromara.business.domain.bo.TestBizBo;
-import org.dromara.business.domain.vo.TestBizVo;
 import org.dromara.common.core.utils.MapstructUtils;
+import org.dromara.common.dependency.business.domain.TestBiz;
+import org.dromara.common.dependency.business.domain.bo.TestBizBo;
+import org.dromara.common.dependency.business.domain.vo.TestBizVo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
