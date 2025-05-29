@@ -138,6 +138,8 @@ public AlipayTradePagePayResponse pay(String subject, String outTradeNo, String 
       * `security.mixed_content.block_active_content`   值为 false
       * `network.cors_preflight.allow_private_network_access`    布尔 == true
 
+
+
 ### 项目存在循环依赖问题, [ruoyi-order](ruoyi-modules/ruoyi-order) 与 [ruoyi-business](ruoyi-modules/ruoyi-business)
 
 #### 思路图
@@ -292,3 +294,13 @@ org.dromara.business.config.BusinessAutoConfiguration
 org.dromara.order.config.OrderAutoConfiguration
 ```
 
+### refactor(order): 11.16 支付成功后修改订单状态和语音识别状态
+
+- 修改支付宝回调通知的处理逻辑，增加支付成功后的后续处理
+- 优化日志输出格式，提高日志可读性 （调正跟踪ID位置）
+- 更新配置文件，调整支付成功后的跳转页面
+- 支付状态流程简述：
+  - 在客户扫码支付后，页面会停留，一直请求后台查询支付状态
+  - 通过`甲蛙内网穿透在线工具`会多出一条数据, 手动请求本地, 后台会根据 `/alipay/callback` 接口修改 order_info 表的状态 I > S
+    - （为什么不会自动完成？ 因为alipay.notifyUrl这个配置设置了甲蛙的地址为通知URL）
+  - 然后Web项目页面就会自动退出支付模态框, 停止后台查询支付状态
