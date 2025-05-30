@@ -315,15 +315,6 @@ org.dromara.order.config.OrderAutoConfiguration
 
 #### 解决循环依赖问题
 
-##### springboot <=2.6 以下版本可用，本项目使用无效，版本 > 3.x
-
-```yaml
---- # 打破循环依赖引入
-spring:
-  main:
-    allow-circular-references: true
-```
-
 ##### 本次出现依赖问题的类
 
 ```text
@@ -439,6 +430,18 @@ public class AfterPayServiceImpl implements IAfterPayService, ApplicationContext
         log.info("执行支付成功动作结束");
     }
 }
+```
+
+##### springboot <=2.6 以下版本可用
+
+实测, 必需添加，不然会启动报错提示：`orderInfoServiceImpl与afterPayServiceImpl互相依赖，Relying upon circular references is discouraged and they are prohibited by default. Update your application to remove the dependency cycle between beans. As a last resort, it may be possible to break the cycle automatically by setting spring.main.allow-circular-references to true.
+`, 但是就添加此配置也无法解决，需要配合上述的双重延迟加载
+
+```yaml
+--- # 打破循环依赖引入
+spring:
+  main:
+    allow-circular-references: true
 ```
 
 ##### 关键修改说明
