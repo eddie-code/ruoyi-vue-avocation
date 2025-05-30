@@ -89,7 +89,7 @@ public class BizFiletrans extends TenantEntity {
     /**
      * 转换状态码
      */
-    private Long transStatusCode;
+    private Integer transStatusCode;
 
     /**
      * 转换状态说明

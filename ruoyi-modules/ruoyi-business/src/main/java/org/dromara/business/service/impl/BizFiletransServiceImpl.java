@@ -1,10 +1,14 @@
 package org.dromara.business.service.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.aliyuncs.CommonResponse;
 import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.business.mapper.BizFiletransMapper;
+import org.dromara.common.core.enums.BusinessExceptionEnum;
+import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.dependency.business.api.IBizFiletransService;
 import org.dromara.common.dependency.business.domain.BizFiletrans;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransBo;
@@ -20,6 +24,7 @@ import org.dromara.common.vod.enums.FiletransStatusEnum;
 import org.dromara.common.vod.util.VodUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,7 +95,7 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
      */
     @Override
     public void afterPaySuccess(Long id) {
-//        Date now = new Date();
+        Date now = new Date();
         BizFiletrans filetrans = new BizFiletrans();
         filetrans.setId(id);
         filetrans.setPayStatus(FiletransPayStatusEnum.S.getCode()); // 支付成功
@@ -98,10 +103,30 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
 //        filetrans.setUpdatedAt(now);
         baseMapper.updateById(filetrans);
 
-        // 发起语音识别任务
+        log.info("发起语音识别任务");
         BizFiletrans bizFiletrans = baseMapper.selectById(id);
-        NlsUtil.trans(filetrans.getAudio(), bizFiletrans.getLang());
-
+        CommonResponse commonResponse = NlsUtil.trans(filetrans.getAudio(), bizFiletrans.getLang());
+        if (commonResponse.getHttpStatus() == 200) {
+            JSONObject result = JSONObject.parseObject(commonResponse.getData());
+            Integer statusCode = result.getInteger("StatusCode");
+            String statusText = result.getString("StatusText");
+            String taskId = result.getString("TaskId");
+            if ("SUCCESS".equals(statusText)) {
+                log.info("录音文件识别请求成功响应： " + result.toJSONString());
+            } else {
+                log.error("录音文件识别请求失败： " + result.toJSONString());
+                throw new ServiceException(BusinessExceptionEnum.FILETRANS_TRANS_ERROR.getDesc());
+            }
+            log.info("更新语音识别状态为：生成字幕中");
+            BizFiletrans filetransAfterNls = new BizFiletrans();
+            filetransAfterNls.setId(id);
+            filetransAfterNls.setStatus(FiletransStatusEnum.SUBTITLE_PENDING.getCode());
+            filetransAfterNls.setTaskId(taskId);
+            filetransAfterNls.setTransTime(now);
+            filetransAfterNls.setTransStatusCode(statusCode);
+            filetransAfterNls.setTransStatusText(statusText);
+            baseMapper.updateById(filetransAfterNls);
+        }
     }
 
     /**

@@ -103,7 +103,7 @@ public class BizFiletransVo implements Serializable {
      * 转换状态码
      */
     @ExcelProperty(value = "转换状态码")
-    private Long transStatusCode;
+    private Integer transStatusCode;
 
     /**
      * 转换状态说明

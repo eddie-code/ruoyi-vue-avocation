@@ -91,7 +91,7 @@ public class BizFiletransBo extends BaseEntity {
     /**
      * 转换状态码
      */
-    private Long transStatusCode;
+    private Integer transStatusCode;
 
     /**
      * 转换状态说明
