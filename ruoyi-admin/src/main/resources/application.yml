@@ -288,3 +288,8 @@ warm-flow:
     - 255,205,23
     ## 已办理
     - 157,255,0
+
+--- # 打破循环依赖引入
+spring:
+  main:
+    allow-circular-references: true
