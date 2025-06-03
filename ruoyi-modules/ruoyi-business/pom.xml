@@ -119,7 +119,6 @@
             <artifactId>ruoyi-common-nls</artifactId>
         </dependency>
 
-
     </dependencies>
 
 </project>

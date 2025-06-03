@@ -457,3 +457,42 @@ spring:
 （3）保持业务逻辑不变：
 * 所有业务逻辑保持不变，只是改变了依赖获取方式
 * 延迟加载确保在 Bean 初始化完成后才获取依赖
+
+
+##### 1
+
+[智能语音交互文档](https://help.aliyun.com/zh/isi/developer-reference/use-function-compute-to-recognize-recording-files)
+
+###### [甲蛙接口回调](http://callback.jiawablog.com/index)
+
+old addr：本地回调地址：http://127.0.0.1:8080/alipay/callback
+
+```text
+gmt_create=2025-06-03+13%3A42%3A42&charset=UTF-8&gmt_payment=2025-06-03+13%3A42%3A49&notify_time=2025-06-03+13%3A42%3A51&subject=%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB%E4%BB%98%E8%B4%B9&sign=M1%2Bx6JbQ7WMM4QKlG0bM%2FK4t%2FTT%2B0hEnPT%2BF7o4ykinON7yyzRzNiYj8n1lLBnn4x4qPHLjGovyyVZ%2FmsTCU4xwL7mGSWdgYFPGtPDJBn%2FVJAAIwszUNBsVepyXCq8HuwLweevQUYXm05VMnBIHcOGQH7p39JeVwEnsqNeRaONtAkC7icNCqihZB9jg106rJLuTi3LUxgoakS9vJmxZZ85zWQ5ENUsHEydRkz%2Fm%2FOXs8H4NHcMo%2FwO%2BxDviaZSwy1K7lp18kdgHrJpc%2Fja%2BgV3aTmDdV04jFbP2dUbkXH3prxdkpB2Y%2B6MXqLGpz2cS4cf7CSmJMrFUOMXWx98tG%2FA%3D%3D&buyer_id=2088722059400519&invoice_amount=0.70&version=1.0&notify_id=2025060301222134250000510505834237&fund_bill_list=%5B%7B%22amount%22%3A%220.70%22%2C%22fundChannel%22%3A%22ALIPAYACCOUNT%22%7D%5D&notify_type=trade_status_sync&out_trade_no=20250603134234024611&total_amount=0.70&trade_status=TRADE_SUCCESS&trade_no=2025060322001400510505794128&auth_app_id=9021000144678582&receipt_amount=0.70&point_amount=0.00&buyer_pay_amount=0.70&app_id=9021000144678582&sign_type=RSA2&seller_id=2088721059373269
+```
+
+new addr：本地回调地址（使用PostMan之类工具请求，甲蛙回调接口没有回调请求参数）：http://127.0.0.1:8080/nls/filetrans/callback
+
+```json
+{
+    "Result": {
+        "Sentences": [
+            {
+                "EndTime": 2365,
+                "SilenceDuration": 0,
+                "BeginTime": 340,
+                "Text": "北京的天气。",
+                "ChannelId": 0,
+                "SpeechRate": 177,
+                "EmotionValue": 5.0
+            }
+        ]
+    },
+    "TaskId": "fb0474184c6d11e9a213e11db149****",
+    "StatusCode": 21050000,
+    "StatusText": "SUCCESS",
+    "RequestTime": 1553237085804,
+    "SolveTime": 1553237086146,
+    "BizDuration": 2956
+}
+```
