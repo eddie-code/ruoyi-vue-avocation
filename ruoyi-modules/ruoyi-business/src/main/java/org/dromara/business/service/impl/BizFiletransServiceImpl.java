@@ -4,11 +4,14 @@ import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.business.mapper.BizFiletransMapper;
 import org.dromara.common.core.enums.BusinessExceptionEnum;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.dependency.business.api.IBizFiletransService;
 import org.dromara.common.dependency.business.domain.BizFiletrans;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransBo;
@@ -104,8 +107,8 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         baseMapper.updateById(filetrans);
 
         log.info("发起语音识别任务");
-        BizFiletrans bizFiletrans = baseMapper.selectById(id);
-        CommonResponse commonResponse = NlsUtil.trans(filetrans.getAudio(), bizFiletrans.getLang());
+        BizFiletrans filetransDB = baseMapper.selectById(id);
+        CommonResponse commonResponse = NlsUtil.trans(filetransDB.getAudio(), filetransDB.getLang());
         if (commonResponse.getHttpStatus() == 200) {
             JSONObject result = JSONObject.parseObject(commonResponse.getData());
             Integer statusCode = result.getInteger("StatusCode");
@@ -127,6 +130,67 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
             filetransAfterNls.setTransStatusText(statusText);
             baseMapper.updateById(filetransAfterNls);
         }
+    }
+
+    @Override
+    public void afterTrans(JSONObject jsonResult) {
+        Date now = new Date();
+        String taskId = jsonResult.getString("TaskId");
+        Integer statusCode = jsonResult.getInteger("StatusCode");
+        String statusText = jsonResult.getString("StatusText");
+
+        BizFiletrans filetrans = new BizFiletrans();
+        filetrans.setUpdateTime(now);
+        filetrans.setTransStatusCode(statusCode);
+        filetrans.setTransStatusText(statusText);
+
+        BizFiletransBo bo = new BizFiletransBo();
+        bo.setTaskId(taskId);
+        bo.setStatus(FiletransStatusEnum.SUBTITLE_PENDING.getCode());
+
+        // 以2开头状态码为正常状态码，回调方式正常状态只返回“21050000”。
+        if ("21050000".equals(statusCode.toString())) {
+            // 完成时间|录音文件识别完成的时间
+            filetrans.setSolveTime(new Date(jsonResult.getLong("SolveTime")));
+            filetrans.setStatus(FiletransStatusEnum.SUBTITLE_SUCCESS.getCode());
+        } else {
+            filetrans.setStatus(FiletransStatusEnum.SUBTITLE_FAILURE.getCode());
+        }
+
+        LambdaQueryWrapper<BizFiletrans> lqw = buildQueryWrapper(bo);
+        // 更新内容， 更新条件
+        int i = baseMapper.update(filetrans, lqw);
+
+        // 保存字幕结果
+        if (i == 0) {
+            log.info("未更新到taskId={}，状态={}/{}，不保存字幕表",
+                taskId,
+                FiletransStatusEnum.SUBTITLE_PENDING.getCode(),
+                FiletransStatusEnum.SUBTITLE_PENDING.getDesc());
+            return;
+        }
+
+    }
+
+    private LambdaQueryWrapper<BizFiletrans> buildQueryWrapper(BizFiletransBo bo) {
+        LambdaQueryWrapper<BizFiletrans> lqw = Wrappers.lambdaQuery();
+        lqw.orderByAsc(BizFiletrans::getId);
+        lqw.eq(bo.getMemberId() != null, BizFiletrans::getMemberId, bo.getMemberId());
+        lqw.like(StringUtils.isNotBlank(bo.getName()), BizFiletrans::getName, bo.getName());
+        lqw.eq(bo.getSecond() != null, BizFiletrans::getSecond, bo.getSecond());
+        lqw.eq(bo.getAmount() != null, BizFiletrans::getAmount, bo.getAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getAudio()), BizFiletrans::getAudio, bo.getAudio());
+        lqw.eq(StringUtils.isNotBlank(bo.getFileSign()), BizFiletrans::getFileSign, bo.getFileSign());
+        lqw.eq(StringUtils.isNotBlank(bo.getPayStatus()), BizFiletrans::getPayStatus, bo.getPayStatus());
+        lqw.eq(StringUtils.isNotBlank(bo.getStatus()), BizFiletrans::getStatus, bo.getStatus());
+        lqw.eq(StringUtils.isNotBlank(bo.getLang()), BizFiletrans::getLang, bo.getLang());
+        lqw.eq(StringUtils.isNotBlank(bo.getVod()), BizFiletrans::getVod, bo.getVod());
+        lqw.eq(StringUtils.isNotBlank(bo.getTaskId()), BizFiletrans::getTaskId, bo.getTaskId());
+        lqw.eq(bo.getTransStatusCode() != null, BizFiletrans::getTransStatusCode, bo.getTransStatusCode());
+        lqw.eq(StringUtils.isNotBlank(bo.getTransStatusText()), BizFiletrans::getTransStatusText, bo.getTransStatusText());
+        lqw.eq(bo.getTransTime() != null, BizFiletrans::getTransTime, bo.getTransTime());
+        lqw.eq(bo.getSolveTime() != null, BizFiletrans::getSolveTime, bo.getSolveTime());
+        return lqw;
     }
 
     /**

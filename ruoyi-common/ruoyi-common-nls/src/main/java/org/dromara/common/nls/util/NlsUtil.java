@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 智能语音交互（NLS） 工具类
+ * <p>
+ * https://help.aliyun.com/zh/isi/developer-reference/sdk-for-java-10?spm=a2c4g.11186623.help-menu-30413.d_3_2_2_1_0.3f9a668f4Nbtfm&scm=20140722.H_90729._.OR_help-T_cn~zh-V_1
  */
 @Slf4j
 @Component
@@ -34,10 +36,11 @@ public class NlsUtil {
      * 发送识别请求结果：{"data":"{\"TaskId\":\"28d1d5569ab2418f8f5fb926e752f9b5\",\"RequestId\":\"60323EBA-A0A2-5CCA-912B-174F72BB5160\",\"StatusText\":\"SUCCESS\",\"StatusCode\":21050000}","httpResponse":{"encoding":"UTF-8","headers":{"Keep-Alive":"timeout=25","Access-Control-Expose-Headers":"*","Access-Control-Allow-Origin":"*","ETag":"1jbWNKy3EDS8OFVuTZHWgew1","x-acs-request-id":"60323EBA-A0A2-5CCA-912B-174F72BB5160","Connection":"keep-alive","Content-Length":"141","Date":"Tue, 05 Dec 2023 02:27:47 GMT","Content-Type":"application/json;charset=utf-8","x-acs-trace-id":"4cbf2b0a68c22588840ba72d2304073e"},"httpContent":"eyJUYXNrSWQiOiIyOGQxZDU1NjlhYjI0MThmOGY1ZmI5MjZlNzUyZjliNSIsIlJlcXVlc3RJZCI6IjYwMzIzRUJBLUEwQTItNUNDQS05MTJCLTE3NEY3MkJCNTE2MCIsIlN0YXR1c1RleHQiOiJTVUNDRVNTIiwiU3RhdHVzQ29kZSI6MjEwNTAwMDB9","httpContentString":"{\"TaskId\":\"28d1d5569ab2418f8f5fb926e752f9b5\",\"RequestId\":\"60323EBA-A0A2-5CCA-912B-174F72BB5160\",\"StatusText\":\"SUCCESS\",\"StatusCode\":21050000}","httpContentType":"JSON","ignoreSSLCerts":false,"reasonPhrase":"OK","status":200,"success":true,"sysEncoding":"UTF-8","sysHeaders":{"Keep-Alive":"timeout=25","Access-Control-Expose-Headers":"*","Access-Control-Allow-Origin":"*","ETag":"1jbWNKy3EDS8OFVuTZHWgew1","x-acs-request-id":"60323EBA-A0A2-5CCA-912B-174F72BB5160","Connection":"keep-alive","Content-Length":"141","Date":"Tue, 05 Dec 2023 02:27:47 GMT","Content-Type":"application/json;charset=utf-8","x-acs-trace-id":"4cbf2b0a68c22588840ba72d2304073e"}},"httpStatus":200}
      *
      * @param fileLink 音频地址 对应 biz_filetrans 里面的 audio
-     * @param appKey 对应 biz_filetrans 里面的 lang 语言
+     * @param appKey   对应 biz_filetrans 里面的 lang 语言
      * @return
      */
     public static CommonResponse trans(String fileLink, String appKey) {
+        log.info("fileLink={}, appKey={}", fileLink, appKey);
         try {
             IAcsClient client = getClient();
 
@@ -80,6 +83,7 @@ public class NlsUtil {
             taskObject.put("enable_callback", true);
             taskObject.put("callback_url", nlsFiletransProperties.getCallback());
             String task = taskObject.toJSONString();
+            System.out.println("NLS设置以上JSON字符串为Body参数: " + task);
             postRequest.putBodyParameter("Task", task);  // 设置以上JSON字符串为Body参数。
             postRequest.setMethod(MethodType.POST);      // 设置为POST方式请求。
             /**
