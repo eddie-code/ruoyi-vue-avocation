@@ -3,7 +3,11 @@ package org.dromara.common.dependency.business.api;
 import jakarta.validation.Valid;
 import com.alibaba.fastjson.JSONObject;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransBo;
+import org.dromara.common.dependency.business.domain.bo.BizFiletransQueryBo;
+import org.dromara.common.dependency.business.domain.vo.BizFiletransVo;
 import org.dromara.common.dependency.order.domain.vo.OrderInfoPayVo;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
 
 /**
  * 文件传输服务接口
@@ -33,4 +37,14 @@ public interface IBizFiletransService {
      * @param jsonResult 包含文件传输结果的JSON对象，用于更新传输状态和结果
      */
     void afterTrans(JSONObject jsonResult);
+
+    /**
+     * 自定义分页查询
+     *
+     * @param bo 文件传输的查询条件对象，包含了查询所需的业务参数
+     * @param pageQuery 分页查询对象，包含了分页所需的参数如页码、每页记录数等
+     * @return 返回一个TableDataInfo对象，其中包含了查询结果列表以及分页信息
+     */
+    TableDataInfo<BizFiletransVo> customPageList(BizFiletransQueryBo bo, PageQuery pageQuery);
+
 }

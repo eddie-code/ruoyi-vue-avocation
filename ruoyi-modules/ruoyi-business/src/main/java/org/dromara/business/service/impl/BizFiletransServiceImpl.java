@@ -1,25 +1,32 @@
 package org.dromara.business.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.business.mapper.BizFiletransMapper;
 import org.dromara.common.core.enums.BusinessExceptionEnum;
 import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.dependency.business.api.IBizFiletransService;
 import org.dromara.common.dependency.business.domain.BizFiletrans;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransBo;
+import org.dromara.common.dependency.business.domain.bo.BizFiletransQueryBo;
+import org.dromara.common.dependency.business.domain.vo.BizFiletransVo;
 import org.dromara.common.dependency.order.api.IOrderInfoService;
 import org.dromara.common.dependency.order.domain.bo.OrderInfoBo;
 import org.dromara.common.dependency.order.domain.vo.OrderInfoPayVo;
 import org.dromara.common.dependency.order.enums.OrderInfoOrderTypeEnum;
 import org.dromara.common.json.utils.JsonUtils;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.nls.util.NlsUtil;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.vod.enums.FiletransPayStatusEnum;
@@ -169,14 +176,21 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
                 FiletransStatusEnum.SUBTITLE_PENDING.getDesc());
             return;
         }
+    }
 
+    @Override
+    public TableDataInfo<BizFiletransVo> customPageList(BizFiletransQueryBo queryBo, PageQuery pageQuery) {
+        BizFiletransBo bo = BeanUtil.copyProperties(queryBo, BizFiletransBo.class);
+        LambdaQueryWrapper<BizFiletrans> lqw = buildQueryWrapper(bo);
+        Page<BizFiletransVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
     }
 
     private LambdaQueryWrapper<BizFiletrans> buildQueryWrapper(BizFiletransBo bo) {
         LambdaQueryWrapper<BizFiletrans> lqw = Wrappers.lambdaQuery();
-        lqw.orderByAsc(BizFiletrans::getId);
+        lqw.orderByDesc(BizFiletrans::getId); // 最新的排序
         lqw.eq(bo.getMemberId() != null, BizFiletrans::getMemberId, bo.getMemberId());
-        lqw.like(StringUtils.isNotBlank(bo.getName()), BizFiletrans::getName, bo.getName());
+        lqw.like(StringUtils.isNotBlank(bo.getName()), BizFiletrans::getName, bo.getName()); // 模糊查询
         lqw.eq(bo.getSecond() != null, BizFiletrans::getSecond, bo.getSecond());
         lqw.eq(bo.getAmount() != null, BizFiletrans::getAmount, bo.getAmount());
         lqw.eq(StringUtils.isNotBlank(bo.getAudio()), BizFiletrans::getAudio, bo.getAudio());
