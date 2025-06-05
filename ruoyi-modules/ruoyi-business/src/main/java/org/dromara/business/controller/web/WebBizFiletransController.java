@@ -45,11 +45,11 @@ public class WebBizFiletransController extends BaseController {
     /**
      * 自定义分页查询
      */
-//    @SaCheckPermission("demo:demo:list")
-    @GetMapping("/page")
-    public TableDataInfo<BizFiletransVo> page(@Validated(QueryGroup.class) BizFiletransQueryBo bo, PageQuery pageQuery) {
+    @SaCheckPermission("web:filetrans:list")
+    @GetMapping("/list")
+    public TableDataInfo<BizFiletransVo> list(@Validated(QueryGroup.class) BizFiletransQueryBo bo, PageQuery pageQuery) {
         bo.setMemberId(LoginHelper.getUserId()); // 会员端, 只查询自己的
-        return bizFiletransService.customPageList(bo, pageQuery);
+        return bizFiletransService.queryPageList(bo, pageQuery);
     }
 
 }

@@ -45,6 +45,6 @@ public interface IBizFiletransService {
      * @param pageQuery 分页查询对象，包含了分页所需的参数如页码、每页记录数等
      * @return 返回一个TableDataInfo对象，其中包含了查询结果列表以及分页信息
      */
-    TableDataInfo<BizFiletransVo> customPageList(BizFiletransQueryBo bo, PageQuery pageQuery);
+    TableDataInfo<BizFiletransVo> queryPageList(BizFiletransQueryBo bo, PageQuery pageQuery);
 
 }

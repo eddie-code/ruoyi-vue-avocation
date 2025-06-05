@@ -179,7 +179,7 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
     }
 
     @Override
-    public TableDataInfo<BizFiletransVo> customPageList(BizFiletransQueryBo queryBo, PageQuery pageQuery) {
+    public TableDataInfo<BizFiletransVo> queryPageList(BizFiletransQueryBo queryBo, PageQuery pageQuery) {
         BizFiletransBo bo = BeanUtil.copyProperties(queryBo, BizFiletransBo.class);
         LambdaQueryWrapper<BizFiletrans> lqw = buildQueryWrapper(bo);
         Page<BizFiletransVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
