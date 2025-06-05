@@ -15,31 +15,48 @@
     </transition>
 
     <el-card shadow="never">
-      <template #header>
-        <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
-            <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['audio:filetrans:add']">新增</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['audio:filetrans:edit']">修改</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['audio:filetrans:remove']">删除</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['audio:filetrans:export']">导出</el-button>
-          </el-col>
-          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-        </el-row>
-      </template>
+<!--      <template #header>-->
+<!--        <el-row :gutter="10" class="mb8">-->
+<!--          <el-col :span="1.5">-->
+<!--            <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['audio:filetrans:add']">新增</el-button>-->
+<!--          </el-col>-->
+<!--          <el-col :span="1.5">-->
+<!--            <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['audio:filetrans:edit']">修改</el-button>-->
+<!--          </el-col>-->
+<!--          <el-col :span="1.5">-->
+<!--            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['audio:filetrans:remove']">删除</el-button>-->
+<!--          </el-col>-->
+<!--          <el-col :span="1.5">-->
+<!--            <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['audio:filetrans:export']">导出</el-button>-->
+<!--          </el-col>-->
+<!--          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>-->
+<!--        </el-row>-->
+<!--      </template>-->
 
       <el-table v-loading="loading" :data="filetransList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="id" align="center" prop="id" v-if="false" />
         <el-table-column label="文件名称" align="center" prop="name" />
-        <el-table-column label="音频时长" align="center" prop="second" />
-        <el-table-column label="识别状态|" align="center" prop="status" />
-        <el-table-column label="音频语言" align="center" prop="lang" />
+        <el-table-column label="支付状态" align="center" prop="payStatus">
+          <template #default="scope">
+            {{ payStatusMap[scope.row.payStatus] || scope.row.payStatus }}
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" align="center" prop="status">
+          <template #default="scope">
+            {{ statusMap[scope.row.status] || scope.row.status }}
+          </template>
+        </el-table-column>
+        <el-table-column label="音频语言" align="center" prop="lang">
+          <template #default="scope">
+            {{ langMap[scope.row.lang] || scope.row.lang }}
+          </template>
+        </el-table-column>
+        <el-table-column label="音频时长" align="center" prop="second">
+          <template #default="scope">
+            {{ formatDuration(scope.row.second) }}
+          </template>
+        </el-table-column>
 <!--        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">-->
 <!--          <template #default="scope">-->
 <!--            <el-tooltip content="修改" placement="top">-->
@@ -58,12 +75,12 @@
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
       <el-form ref="filetransFormRef" :model="form" :rules="rules" label-width="80px">
       </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
+<!--      <template #footer>-->
+<!--        <div class="dialog-footer">-->
+<!--          <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>-->
+<!--          <el-button @click="cancel">取 消</el-button>-->
+<!--        </div>-->
+<!--      </template>-->
     </el-dialog>
   </div>
 </template>
@@ -161,48 +178,48 @@ const handleSelectionChange = (selection: FiletransVO[]) => {
   multiple.value = !selection.length;
 }
 
-/** 新增按钮操作 */
-const handleAdd = () => {
-  reset();
-  dialog.visible = true;
-  dialog.title = "添加语音识别";
-}
-
-/** 修改按钮操作 */
-const handleUpdate = async (row?: FiletransVO) => {
-  reset();
-  const _id = row?.id || ids.value[0]
-  const res = await getFiletrans(_id);
-  Object.assign(form.value, res.data);
-  dialog.visible = true;
-  dialog.title = "修改语音识别";
-}
-
-/** 提交按钮 */
-const submitForm = () => {
-  filetransFormRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      buttonLoading.value = true;
-      if (form.value.id) {
-        await updateFiletrans(form.value).finally(() =>  buttonLoading.value = false);
-      } else {
-        await addFiletrans(form.value).finally(() =>  buttonLoading.value = false);
-      }
-      proxy?.$modal.msgSuccess("操作成功");
-      dialog.visible = false;
-      await getList();
-    }
-  });
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (row?: FiletransVO) => {
-  const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除语音识别编号为"' + _ids + '"的数据项？').finally(() => loading.value = false);
-  await delFiletrans(_ids);
-  proxy?.$modal.msgSuccess("删除成功");
-  await getList();
-}
+// /** 新增按钮操作 */
+// const handleAdd = () => {
+//   reset();
+//   dialog.visible = true;
+//   dialog.title = "添加语音识别";
+// }
+//
+// /** 修改按钮操作 */
+// const handleUpdate = async (row?: FiletransVO) => {
+//   reset();
+//   const _id = row?.id || ids.value[0]
+//   const res = await getFiletrans(_id);
+//   Object.assign(form.value, res.data);
+//   dialog.visible = true;
+//   dialog.title = "修改语音识别";
+// }
+//
+// /** 提交按钮 */
+// const submitForm = () => {
+//   filetransFormRef.value?.validate(async (valid: boolean) => {
+//     if (valid) {
+//       buttonLoading.value = true;
+//       if (form.value.id) {
+//         await updateFiletrans(form.value).finally(() =>  buttonLoading.value = false);
+//       } else {
+//         await addFiletrans(form.value).finally(() =>  buttonLoading.value = false);
+//       }
+//       proxy?.$modal.msgSuccess("操作成功");
+//       dialog.visible = false;
+//       await getList();
+//     }
+//   });
+// }
+//
+// /** 删除按钮操作 */
+// const handleDelete = async (row?: FiletransVO) => {
+//   const _ids = row?.id || ids.value;
+//   await proxy?.$modal.confirm('是否确认删除语音识别编号为"' + _ids + '"的数据项？').finally(() => loading.value = false);
+//   await delFiletrans(_ids);
+//   proxy?.$modal.msgSuccess("删除成功");
+//   await getList();
+// }
 
 /** 导出按钮操作 */
 const handleExport = () => {
@@ -210,6 +227,47 @@ const handleExport = () => {
     ...queryParams.value
   }, `filetrans_${new Date().getTime()}.xlsx`)
 }
+
+/**
+ * 获取枚举翻译对应的内容
+ */
+const payStatusMap = computed(() => {
+  return Object.values(window.FILETRANS_PAY_STATUS).reduce((acc, item) => {
+    acc[item.code] = item.desc;
+    return acc;
+  }, {} as Record<string, string>);
+});
+const statusMap = computed(() => {
+  return Object.values(window.FILETRANS_STATUS).reduce((acc, item) => {
+    acc[item.code] = item.desc;
+    return acc;
+  }, {} as Record<string, string>);
+});
+const langMap = computed(() => {
+  return Object.values(window.FILETRANS_LANG).reduce((acc, item) => {
+    acc[item.code] = item.desc;
+    return acc;
+  }, {} as Record<string, string>);
+});
+
+/**
+ * 格式化秒数为 时:分:秒
+ * @param seconds
+ */
+const formatDuration = (seconds) => {
+  if (!seconds && seconds !== 0) return '-';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  // 使用 padStart 确保两位数显示
+  const formattedHours = String(hours).padStart(2, '0');
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(secs).padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+};
 
 onMounted(() => {
   getList();
