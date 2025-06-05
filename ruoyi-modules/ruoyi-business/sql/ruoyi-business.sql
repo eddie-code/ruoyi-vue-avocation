@@ -29,7 +29,6 @@ CREATE TABLE `biz_filetrans`
 ) ENGINE = INNODB
   DEFAULT charset = utf8mb4 COMMENT = '语音识别表';
 
-
 -- filetrans_subtitle 语音识别字幕
 drop table if exists `biz_filetrans_subtitle`;
 create table `biz_filetrans_subtitle`
@@ -42,10 +41,7 @@ create table `biz_filetrans_subtitle`
     `text`         varchar(2000) comment '字幕',
     `tenant_id`    VARCHAR(20)       DEFAULT '000000' COMMENT '租户编号',
     `del_flag`     CHAR(1)           DEFAULT '0' COMMENT '删除标志（0代表存在 1代表删除）',
-    `create_dept`  BIGINT(20) COMMENT '创建部门',
-    `create_by`    BIGINT(20) COMMENT '创建者',
     `create_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_by`    BIGINT(20) COMMENT '更新者',
     `update_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     primary key (`id`),
     index filetrans_subtitle_filetrans_id (`filetrans_id`)

@@ -21,3 +21,55 @@ Clientid: {{clientId}}
 
 ###
 
+# 域名是开启ngrok的地址
+POST https://narwhal-alert-sincerely.ngrok-free.app/nls/filetrans/callback
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Clientid: {{clientId}}
+
+{
+    "Result": {
+        "Sentences": [
+            {
+                "EndTime": 22780,
+                "SilenceDuration": 21,
+                "SpeakerId": "1",
+                "BeginTime": 21120,
+                "Text": "年轻人帮助。",
+                "ChannelId": 0,
+                "SpeechRate": 216,
+                "EmotionValue": 7.8
+            },
+            {
+                "EndTime": 24080,
+                "SilenceDuration": 0,
+                "SpeakerId": "1",
+                "BeginTime": 23020,
+                "Text": "正常规。",
+                "ChannelId": 0,
+                "SpeechRate": 226,
+                "EmotionValue": 7.9
+            },
+            {
+                "EndTime": 28400,
+                "SilenceDuration": 0,
+                "SpeakerId": "1",
+                "BeginTime": 24960,
+                "Text": "为活动欢迎大众热情的氛围。",
+                "ChannelId": 0,
+                "SpeechRate": 226,
+                "EmotionValue": 7.8
+            }
+        ]
+    },
+    "BizDuration": 210234,
+    "RecDuration": 210234,
+    "RequestTime": 1749011191612,
+    "SolveTime": 1749011195841,
+    "TaskId": "7bfd281a0d4e4eb992770d416c7449cd",
+    "StatusCode": 21050000,
+    "StatusText": "SUCCESS"
+}
+
+###
+

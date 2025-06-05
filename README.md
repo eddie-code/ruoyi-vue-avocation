@@ -87,7 +87,7 @@ grantType 	授权类型（表 sys_client）
 }
 ```
 
-### feat(order): 11.9 下单成功后跳转到支付宝支付页面
+## feat(order): 11.9 下单成功后跳转到支付宝支付页面
 
 #### 控制返回二维码, 还是支付页面配置
 
@@ -459,7 +459,7 @@ spring:
 * 延迟加载确保在 Bean 初始化完成后才获取依赖
 
 
-##### 1
+##### 回调使用工具
 
 [智能语音交互文档](https://help.aliyun.com/zh/isi/developer-reference/use-function-compute-to-recognize-recording-files)
 
@@ -468,7 +468,17 @@ spring:
 * old addr：本地回调地址：http://127.0.0.1:8080/alipay/callback
 * new addr：本地回调地址：http://127.0.0.1:8080/nls/filetrans/callback
 
-##### 错误记录
+###### Ngrok
+
+[教你用ngrok实现内网穿透](https://blog.csdn.net/2301_79728896/article/details/145519092)
+
+注册与登录：https://dashboard.ngrok.com/get-started/setup/windows
+
+按上面文档可配置固定的域名，然后下载对应系统的软件
+
+双击图标：ngrok http --url=narwhal-alert-sincerely.ngrok-free.app 8080 --region=jp
+
+## 错误记录
 
 1、报错信息：{TaskId：xxxxxxxxxx，StatusCode：41050025，StatusText：FILE_403_FORBIDDEN}
 

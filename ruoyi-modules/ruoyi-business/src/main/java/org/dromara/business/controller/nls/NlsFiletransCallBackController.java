@@ -42,6 +42,10 @@ public class NlsFiletransCallBackController {
     private static final Pattern PATTERN_SERVER_ERR = Pattern.compile("5105[0-9]*");
 
     // 必须是post方式
+    /**
+     * 增加语音识别异步回调
+     * @param request
+     */
     @PostMapping("/filetrans/callback")
     public void GetResult(HttpServletRequest request) {
         byte[] buffer = new byte[request.getContentLength()];

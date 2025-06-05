@@ -35,17 +35,18 @@ public class BizFiletransSubtitle extends TenantEntity {
     /**
      * 索引号
      */
-    private Long index;
+    @TableField("`index`")  // 使用反引号转义MySQL关键字
+    private Integer index;
 
     /**
      * 开始时间，毫秒
      */
-    private Long begin;
+    private Integer begin;
 
     /**
      * 结束时间，毫秒
      */
-    private Long end;
+    private Integer end;
 
     /**
      * 字幕

@@ -13,9 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.business.mapper.BizFiletransMapper;
 import org.dromara.common.core.enums.BusinessExceptionEnum;
 import org.dromara.common.core.exception.ServiceException;
-import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.dependency.business.api.IBizFiletransService;
+import org.dromara.common.dependency.business.api.IBizFiletransSubtitleService;
 import org.dromara.common.dependency.business.domain.BizFiletrans;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransBo;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransQueryBo;
@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +51,8 @@ import java.util.Map;
 public class BizFiletransServiceImpl implements IBizFiletransService {
 
     private final BizFiletransMapper baseMapper;
+
+    private final IBizFiletransSubtitleService bizFiletransSubtitleService;
 
     private final IOrderInfoService orderInfoService;
 
@@ -169,12 +172,24 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         int i = baseMapper.update(filetrans, lqw);
 
         // 保存字幕结果
+        // 判断是否更新成功, 成功才进入保存子表
         if (i == 0) {
             log.info("未更新到taskId={}，状态={}/{}，不保存字幕表",
                 taskId,
                 FiletransStatusEnum.SUBTITLE_PENDING.getCode(),
                 FiletransStatusEnum.SUBTITLE_PENDING.getDesc());
             return;
+        }
+
+        // 返回成功才保存到子表
+        if ("21050000".equals(statusCode.toString())) {
+            BizFiletransBo bo1 = new BizFiletransBo();
+            bo1.setTaskId(taskId);
+            List<BizFiletrans> bizFiletransList = baseMapper.selectList(buildQueryWrapper(bo1));
+            // TaskId 是支付宝返回的唯一的, 所以只取第0条就可以
+            BizFiletrans bizFiletransDB = bizFiletransList.get(0);
+            JSONObject result = jsonResult.getJSONObject("Result");
+            bizFiletransSubtitleService.saveSubtitle(bizFiletransDB.getId(), result);
         }
     }
 
