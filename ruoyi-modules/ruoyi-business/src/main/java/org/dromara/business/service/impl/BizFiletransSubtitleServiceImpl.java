@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.business.mapper.BizFiletransSubtitleMapper;
@@ -12,6 +13,9 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.dependency.business.api.IBizFiletransSubtitleService;
 import org.dromara.common.dependency.business.domain.BizFiletransSubtitle;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransSubtitleBo;
+import org.dromara.common.dependency.business.domain.vo.BizFiletransSubtitleVo;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +66,14 @@ public class BizFiletransSubtitleServiceImpl implements IBizFiletransSubtitleSer
         if (!subtitleList.isEmpty()) {
             baseMapper.insertBatch(subtitleList);
         }
+    }
+
+    @Override
+    public TableDataInfo<BizFiletransSubtitleVo> queryPageList(BizFiletransSubtitleBo bo, PageQuery pageQuery) {
+        LambdaQueryWrapper<BizFiletransSubtitle> lqw = buildQueryWrapper(bo);
+        lqw.orderByAsc(BizFiletransSubtitle::getIndex); // 正序，看字幕通常都是 0s 看到最后
+        Page<BizFiletransSubtitleVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
     }
 
     private LambdaQueryWrapper<BizFiletransSubtitle> buildQueryWrapper(BizFiletransSubtitleBo bo) {

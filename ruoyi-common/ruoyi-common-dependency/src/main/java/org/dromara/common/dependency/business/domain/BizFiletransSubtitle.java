@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.util.Date;
 
 /**
  * 语音识别字幕对象 biz_filetrans_subtitle
@@ -14,9 +15,8 @@ import java.io.Serial;
  * @date 2025-06-05
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("biz_filetrans_subtitle")
-public class BizFiletransSubtitle extends TenantEntity {
+public class BizFiletransSubtitle {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -59,5 +59,15 @@ public class BizFiletransSubtitle extends TenantEntity {
     @TableLogic
     private String delFlag;
 
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
 
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
 }
