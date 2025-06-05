@@ -10,6 +10,7 @@ import org.dromara.common.core.domain.R;
 import org.dromara.common.dependency.business.domain.bo.GetUploadAuthBo;
 import org.dromara.common.dependency.business.domain.vo.GetUploadAuthVo;
 import org.dromara.common.vod.util.VodUtil;
+import org.dromara.common.web.core.BaseController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ import java.math.BigDecimal;
 //@SaIgnore // 跳过鉴
 @RestController
 @RequestMapping("/web/vod")
-public class WebVodController {
+public class WebVodController extends BaseController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebVodController.class);
 

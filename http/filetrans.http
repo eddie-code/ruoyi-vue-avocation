@@ -14,7 +14,7 @@ Clientid: {{clientId}}
 
 ###
 
-GET http://localhost:8080/web/filetrans/page?pageNum=1&pageSize=5&status=SS
+GET http://localhost:8080/web/filetrans/list?pageNum=1&pageSize=5&status=SS
 Accept: application/json
 Authorization: Bearer {{accessToken}}
 Clientid: {{clientId}}
