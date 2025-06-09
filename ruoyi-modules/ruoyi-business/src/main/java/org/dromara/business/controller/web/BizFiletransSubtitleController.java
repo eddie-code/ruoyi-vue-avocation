@@ -10,6 +10,7 @@ import org.dromara.common.core.validate.QueryGroup;
 import org.dromara.common.dependency.business.api.IBizFiletransSubtitleService;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransQueryBo;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransSubtitleBo;
+import org.dromara.common.dependency.business.domain.bo.GenSubtitleBo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransSubtitleVo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransVo;
 import org.dromara.common.satoken.utils.LoginHelper;
@@ -25,6 +26,7 @@ import org.dromara.common.core.validate.EditGroup;
 import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.excel.utils.ExcelUtil;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+
 /**
  * 语音识别字幕
  *
@@ -46,6 +48,12 @@ public class BizFiletransSubtitleController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<BizFiletransSubtitleVo> list(@Validated(QueryGroup.class) BizFiletransSubtitleBo bo, PageQuery pageQuery) {
         return bizFiletransSubtitleService.queryPageList(bo, pageQuery);
+    }
+
+    @GetMapping("/genSubtitle")
+    public R genSubtitle(@Validated(QueryGroup.class) GenSubtitleBo bo) {
+        bizFiletransSubtitleService.genSubtitle(bo);
+        return R.ok();
     }
 
 }

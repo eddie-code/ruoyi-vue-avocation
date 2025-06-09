@@ -4,3 +4,10 @@ Authorization: Bearer {{accessToken}}
 Clientid: {{clientId}}
 
 ###
+
+GET http://localhost:8080/web/filetransSubtitle/genSubtitle?filetransId=1930118876835184640
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+Clientid: {{clientId}}
+
+###

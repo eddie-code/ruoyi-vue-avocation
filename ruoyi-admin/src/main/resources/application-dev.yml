@@ -228,6 +228,10 @@ nls:
     taskVersion: 4.0
     version: '2018-08-17'
 
+--- # 临时目录（存放字幕文件）
+temp:
+  dir: D:\tmp\nls
+
 --- # 三方授权
 justauth:
   # 前端外网访问地址
