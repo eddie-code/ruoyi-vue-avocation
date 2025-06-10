@@ -51,9 +51,10 @@ public class BizFiletransSubtitleController extends BaseController {
     }
 
     @GetMapping("/genSubtitle")
-    public R genSubtitle(@Validated(QueryGroup.class) GenSubtitleBo bo) {
-        bizFiletransSubtitleService.genSubtitle(bo);
-        return R.ok();
+    public R<String> genSubtitle(@Validated(QueryGroup.class) GenSubtitleBo bo) {
+        String url = bizFiletransSubtitleService.genSubtitle(bo);
+        // 如果是实体返回值, 不是String类型, 就返回data, 不是msg
+        return R.ok("操作成功", url);
     }
 
 }

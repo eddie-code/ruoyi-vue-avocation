@@ -38,5 +38,5 @@ public interface IBizFiletransSubtitleService {
      * @param bo
      * @return
      */
-    void genSubtitle(GenSubtitleBo bo);
+    String genSubtitle(GenSubtitleBo bo);
 }

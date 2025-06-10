@@ -18,6 +18,7 @@ import org.dromara.common.dependency.business.domain.bo.GenSubtitleBo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransSubtitleVo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.vod.util.VodUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +86,7 @@ public class BizFiletransSubtitleServiceImpl implements IBizFiletransSubtitleSer
     }
 
     @Override
-    public void genSubtitle(GenSubtitleBo bo) {
+    public String genSubtitle(GenSubtitleBo bo) {
         Long filetransId = bo.getFiletransId();
         log.info("获取字幕");
         LambdaQueryWrapper<BizFiletransSubtitle> lqw = Wrappers.lambdaQuery();
@@ -101,6 +102,11 @@ public class BizFiletransSubtitleServiceImpl implements IBizFiletransSubtitleSer
 
         FileUtil.mkdir(tempDir);
         FileUtil.writeBytes(buffer.toString().getBytes(), subtitleFullPath);
+
+        String url = VodUtil.uploadSubtitle(subtitleFullPath);
+
+        return url;
+
     }
 
     private LambdaQueryWrapper<BizFiletransSubtitle> buildQueryWrapper(BizFiletransSubtitleBo bo) {
