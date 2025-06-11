@@ -5,9 +5,10 @@
         <el-card shadow="hover">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true">
             <el-form-item>
-              <el-button type="primary" icon="Search" @click="showModal">上传音频</el-button>
-              <FiletransUpload ref="filetransSubtitleCom"></FiletransUpload>
-              <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+              <el-button type="primary" icon="UploadFilled" @click="showModal">上传音频</el-button>
+              <FiletransUpload ref="filetransUploadCom"></FiletransUpload>
+              <FiletransSubtitle ref="filetransSubtitleCom"></FiletransSubtitle>
+              <el-button icon="Refresh" @click="resetQuery">刷新列表</el-button>
             </el-form-item>
           </el-form>
         </el-card>
@@ -34,7 +35,7 @@
 <!--      </template>-->
 
       <el-table v-loading="loading" :data="filetransList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
+<!--        <el-table-column type="selection" width="55" align="center" />-->
         <el-table-column label="id" align="center" prop="id" v-if="false" />
         <el-table-column label="文件名称" align="center" prop="name" />
         <el-table-column label="支付状态" align="center" prop="payStatus">
@@ -57,16 +58,23 @@
             {{ formatDuration(scope.row.second) }}
           </template>
         </el-table-column>
-<!--        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">-->
-<!--          <template #default="scope">-->
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+          <template #default="scope">
 <!--            <el-tooltip content="修改" placement="top">-->
 <!--              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['audio:filetrans:edit']"></el-button>-->
 <!--            </el-tooltip>-->
 <!--            <el-tooltip content="删除" placement="top">-->
 <!--              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['audio:filetrans:remove']"></el-button>-->
 <!--            </el-tooltip>-->
-<!--          </template>-->
-<!--        </el-table-column>-->
+            <!-- 仅当状态为 SS（字幕生成成功）时显示按钮 -->
+            <el-tooltip v-if="scope.row.status === 'SS'" content="查看字幕" placement="top">
+              <el-button link type="primary" icon="Document" @click="showSubtitleModal(scope.row)"></el-button>
+            </el-tooltip>
+
+            <!-- 其他状态显示横线占位 -->
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
       </el-table>
 
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
@@ -105,15 +113,25 @@ const total = ref(0);
 const queryFormRef = ref<ElFormInstance>();
 const filetransFormRef = ref<ElFormInstance>();
 
+const filetransUploadCom = ref();
 const filetransSubtitleCom = ref();
 
 const showModal = () => {
   console.log('Button clicked'); // 调试信息
-  if (filetransSubtitleCom.value) {
-    filetransSubtitleCom.value.showModal();
+  if (filetransUploadCom.value) {
+    filetransUploadCom.value.showModal();
     console.log('showModal 在 FiletransUpload 上调用'); // 调试信息
   } else {
-    console.error('filetransSubtitleCom 未定义'); // 错误信息
+    console.error('filetransUploadCom 未定义'); // 错误信息
+  }
+};
+
+const showSubtitleModal = (row: FiletransVO) => {
+  console.log('查看字幕', row.id);
+  if (filetransSubtitleCom.value) {
+    filetransSubtitleCom.value.showModal(row);
+  } else {
+    console.error('filetransSubtitleCom 未定义');
   }
 };
 
