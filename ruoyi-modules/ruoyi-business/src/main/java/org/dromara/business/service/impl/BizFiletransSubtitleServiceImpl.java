@@ -104,6 +104,10 @@ public class BizFiletransSubtitleServiceImpl implements IBizFiletransSubtitleSer
         FileUtil.writeBytes(buffer.toString().getBytes(), subtitleFullPath);
 
         String url = VodUtil.uploadSubtitle(subtitleFullPath);
+        log.info("上传字幕到辅助媒资成功：{}", url);
+
+        log.info("删除本地字幕临时文件：{}", subtitleFullPath);
+        FileUtil.del(subtitleFullPath);
 
         return url;
 
