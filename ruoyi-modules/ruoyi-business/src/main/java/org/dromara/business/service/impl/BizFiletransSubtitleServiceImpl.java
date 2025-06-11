@@ -15,6 +15,7 @@ import org.dromara.common.dependency.business.api.IBizFiletransSubtitleService;
 import org.dromara.common.dependency.business.domain.BizFiletransSubtitle;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransSubtitleBo;
 import org.dromara.common.dependency.business.domain.bo.GenSubtitleBo;
+import org.dromara.common.dependency.business.domain.bo.GenTextBo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransSubtitleVo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -87,6 +88,7 @@ public class BizFiletransSubtitleServiceImpl implements IBizFiletransSubtitleSer
 
     @Override
     public String genSubtitle(GenSubtitleBo bo) {
+        String suffix = ".srt";
         Long filetransId = bo.getFiletransId();
         log.info("获取字幕");
         LambdaQueryWrapper<BizFiletransSubtitle> lqw = Wrappers.lambdaQuery();
@@ -97,21 +99,76 @@ public class BizFiletransSubtitleServiceImpl implements IBizFiletransSubtitleSer
         log.info("格式化字幕");
         StringBuffer buffer = this.formatSubtitle(bizFiletransSubtitleList);
 
-        String subtitleFullPath = tempDir + filetransId + ".srt";
-        log.info("生成字幕文件：{}", subtitleFullPath);
-
-        FileUtil.mkdir(tempDir);
-        FileUtil.writeBytes(buffer.toString().getBytes(), subtitleFullPath);
-
-        String url = VodUtil.uploadSubtitle(subtitleFullPath);
-        log.info("上传字幕到辅助媒资成功：{}", url);
-
-        log.info("删除本地字幕临时文件：{}", subtitleFullPath);
-        FileUtil.del(subtitleFullPath);
-
-        return url;
-
+        return uploadFile(filetransId, buffer, suffix);
     }
+
+    @Override
+    public String genText(GenTextBo bo) {
+        String suffix = ".txt";
+        Long filetransId = bo.getFiletransId();
+        log.info("获取文本");
+        LambdaQueryWrapper<BizFiletransSubtitle> lqw = Wrappers.lambdaQuery();
+        lqw.orderByAsc(BizFiletransSubtitle::getId);
+        lqw.eq(bo.getFiletransId() != null, BizFiletransSubtitle::getFiletransId, filetransId);
+        List<BizFiletransSubtitle> bizFiletransSubtitleList = baseMapper.selectList(lqw);
+
+        log.info("格式化文本");
+        StringBuffer buffer = this.formatText(bizFiletransSubtitleList);
+
+        return uploadFile(filetransId, buffer, suffix);
+    }
+
+    /**
+     * 上传文件方法
+     * 该方法负责将给定的字符串缓冲区内容保存到临时目录中，然后上传到视频点播服务，并在上传成功后删除临时文件
+     *
+     * @param filetransId 文件传输ID，用于生成临时文件名
+     * @param buffer      包含文件内容的字符串缓冲区
+     * @param suffix      文件后缀名，用于指定文件类型
+     * @return 返回上传成功后的文件URL
+     */
+    private String uploadFile(Long filetransId, StringBuffer buffer, String suffix) {
+        // 生成临时文件的全路径
+        String fullPath = tempDir + filetransId + suffix;
+        log.info("生成临时文件：{}", fullPath);
+
+        // 确保临时目录存在
+        FileUtil.mkdir(tempDir);
+        // 将缓冲区的内容写入临时文件
+        FileUtil.writeBytes(buffer.toString().getBytes(), fullPath);
+
+        // 上传临时文件到视频点播服务
+        String url = VodUtil.uploadSubtitle(fullPath);
+        log.info("上传临时文件成功：{}", url);
+
+        // 删除临时文件
+        log.info("删除临时文件：{}", fullPath);
+        FileUtil.del(fullPath);
+
+        // 返回上传后的文件URL
+        return url;
+    }
+
+    /**
+     * 格式化纯文本
+     * 该方法将一个包含字幕信息的列表格式化为一个大的字符串缓冲区，每个字幕文本占一行
+     *
+     * @param list 包含 {@link BizFiletransSubtitle} 对象的列表，这些对象包含要格式化的文本
+     * @return 返回包含所有字幕文本的字符串缓冲区
+     */
+    private StringBuffer formatText(List<BizFiletransSubtitle> list) {
+        log.info("拼接纯文本数据，总行数：{}", list.size());
+        StringBuffer buffer = new StringBuffer();
+
+        // 遍历字幕列表，将每个字幕文本添加到缓冲区，并在末尾添加换行符
+        for (BizFiletransSubtitle item : list) {
+            buffer.append(item.getText());
+            buffer.append(System.getProperty("line.separator"));
+        }
+        log.info("拼接纯文本完成，字符数：{}", buffer.length());
+        return buffer;
+    }
+
 
     private LambdaQueryWrapper<BizFiletransSubtitle> buildQueryWrapper(BizFiletransSubtitleBo bo) {
         Map<String, Object> params = bo.getParams();

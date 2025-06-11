@@ -11,6 +11,7 @@ import org.dromara.common.dependency.business.api.IBizFiletransSubtitleService;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransQueryBo;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransSubtitleBo;
 import org.dromara.common.dependency.business.domain.bo.GenSubtitleBo;
+import org.dromara.common.dependency.business.domain.bo.GenTextBo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransSubtitleVo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransVo;
 import org.dromara.common.satoken.utils.LoginHelper;
@@ -53,6 +54,13 @@ public class BizFiletransSubtitleController extends BaseController {
     @GetMapping("/genSubtitle")
     public R<String> genSubtitle(@Validated(QueryGroup.class) GenSubtitleBo bo) {
         String url = bizFiletransSubtitleService.genSubtitle(bo);
+        // 如果是实体返回值, 不是String类型, 就返回data, 不是msg
+        return R.ok("操作成功", url);
+    }
+
+    @GetMapping("/genText")
+    public R<String> genText(@Validated(QueryGroup.class) GenTextBo bo) {
+        String url = bizFiletransSubtitleService.genText(bo);
         // 如果是实体返回值, 不是String类型, 就返回data, 不是msg
         return R.ok("操作成功", url);
     }

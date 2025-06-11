@@ -3,6 +3,7 @@ package org.dromara.common.dependency.business.api;
 import com.alibaba.fastjson.JSONObject;
 import org.dromara.common.dependency.business.domain.bo.BizFiletransSubtitleBo;
 import org.dromara.common.dependency.business.domain.bo.GenSubtitleBo;
+import org.dromara.common.dependency.business.domain.bo.GenTextBo;
 import org.dromara.common.dependency.business.domain.vo.BizFiletransSubtitleVo;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -39,4 +40,12 @@ public interface IBizFiletransSubtitleService {
      * @return
      */
     String genSubtitle(GenSubtitleBo bo);
+
+    /**
+     * 生成纯文本文件
+     *
+     * @param bo
+     * @return
+     */
+    String genText(GenTextBo bo);
 }
