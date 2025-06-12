@@ -23,17 +23,43 @@
       @change="handleTableChange"
       bordered
     >
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'begin'">
-          {{ formatTime(record.begin) }}
-        </template>
-        <template v-else-if="column.dataIndex === 'end'">
-          {{ formatTime(record.end) }}
+      <!-- 开始时间 | 结束时间 | 字幕 -->
+<!--      <template #bodyCell="{ column, record }">-->
+<!--        <template v-if="column.dataIndex === 'begin'">-->
+<!--          {{ formatTime(record.begin) }}-->
+<!--        </template>-->
+<!--        <template v-else-if="column.dataIndex === 'end'">-->
+<!--          {{ formatTime(record.end) }}-->
+<!--        </template>-->
+<!--        <template v-else-if="column.dataIndex === 'text'">-->
+<!--          {{ record.text }}-->
+<!--        </template>-->
+<!--      </template>-->
+      <!-- 时间段 | 字幕 -->
+<!--      <template #bodyCell="{ column, record }">-->
+<!--        <template v-if="column.key === 'timeRange'">-->
+<!--          {{ formatTime(record.begin) }} - {{ formatTime(record.end) }}-->
+<!--        </template>-->
+<!--        <template v-else-if="column.dataIndex === 'text'">-->
+<!--          {{ record.text }}-->
+<!--        </template>-->
+<!--      </template>-->
+      <!-- 时间段（增加判断第一个时间与最后一个时间，添加加粗红色的样式） | 字幕 -->
+      <template #bodyCell="{ column, record, index }">
+        <template v-if="column.key === 'timeRange'">
+          <span :style="pagination.current === 1 && index === 0 ? 'color: red; font-weight: bold' : ''">
+            {{ formatTime(record.begin) }}
+          </span>
+          -
+          <span :style="isLastPageLastItem(index) ? 'color: red; font-weight: bold' : ''">
+             {{ formatTime(record.end) }}
+         </span>
         </template>
         <template v-else-if="column.dataIndex === 'text'">
           {{ record.text }}
         </template>
       </template>
+
     </a-table>
   </a-modal>
 </template>
@@ -44,18 +70,30 @@ import { listFiletransSubtitle } from '@/api/audio/filetrans';
 import type { TableProps } from 'ant-design-vue';
 
 // 表格列定义 - 更新为匹配后端字段
+// const columns = [
+//   {
+//     title: '开始时间',
+//     dataIndex: 'begin',
+//     key: 'begin',
+//     width: 120,
+//   },
+//   {
+//     title: '结束时间',
+//     dataIndex: 'end',
+//     key: 'end',
+//     width: 120,
+//   },
+//   {
+//     title: '字幕',
+//     dataIndex: 'text',
+//     key: 'text',
+//   },
+// ];
 const columns = [
   {
-    title: '开始时间',
-    dataIndex: 'begin',
-    key: 'begin',
-    width: 120,
-  },
-  {
-    title: '结束时间',
-    dataIndex: 'end',
-    key: 'end',
-    width: 120,
+    title: '时间段',
+    key: 'timeRange',
+    width: 250, // 适当增加宽度
   },
   {
     title: '字幕',
@@ -63,6 +101,7 @@ const columns = [
     key: 'text',
   },
 ];
+
 
 const open = ref(false);
 const filetrans = ref<Record<string, any>>({});
@@ -90,6 +129,20 @@ const formatTime = (milliseconds: number): string => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   // 修改前（包含毫秒）
   // return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+};
+
+// 在 formatTime 函数下方添加
+const isLastPageLastItem = (index: number): boolean => {
+  // 计算总页数
+  const totalPage = Math.ceil(pagination.total / pagination.pageSize);
+
+  // 判断条件：
+  // 1. 当前页是最后一页
+  // 2. 当前项是当前页的最后一项
+  // 3. 总记录数不为0（避免空数据时出错）
+  return pagination.current === totalPage &&
+    index === dataList.value.length - 1 &&
+    pagination.total > 0;
 };
 
 // 显示模态框
