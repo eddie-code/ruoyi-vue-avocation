@@ -2,6 +2,8 @@ package org.dromara.common.dependency.business.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.dromara.common.dependency.business.domain.BizFiletransSubtitle;
@@ -28,12 +30,14 @@ public class BizFiletransSubtitleVo implements Serializable {
     /**
      * id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ExcelProperty(value = "id")
     private Long id;
 
     /**
      * 录音转换ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ExcelProperty(value = "录音转换ID")
     private Long filetransId;
 
@@ -41,19 +45,19 @@ public class BizFiletransSubtitleVo implements Serializable {
      * 索引号
      */
     @ExcelProperty(value = "索引号")
-    private Long index;
+    private Integer index;
 
     /**
      * 开始时间，毫秒
      */
     @ExcelProperty(value = "开始时间，毫秒")
-    private Long begin;
+    private Integer begin;
 
     /**
      * 结束时间，毫秒
      */
     @ExcelProperty(value = "结束时间，毫秒")
-    private Long end;
+    private Integer end;
 
     /**
      * 字幕

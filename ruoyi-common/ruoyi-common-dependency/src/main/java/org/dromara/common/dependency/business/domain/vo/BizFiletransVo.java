@@ -2,6 +2,8 @@ package org.dromara.common.dependency.business.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.dromara.common.dependency.business.domain.BizFiletrans;
@@ -30,12 +32,14 @@ public class BizFiletransVo implements Serializable {
     /**
      * id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ExcelProperty(value = "id")
     private Long id;
 
     /**
      * 会员ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ExcelProperty(value = "会员ID")
     private Long memberId;
 

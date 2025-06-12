@@ -2,6 +2,8 @@ package org.dromara.common.dependency.order.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.dromara.common.dependency.order.domain.OrderInfo;
@@ -30,6 +32,7 @@ public class OrderInfoVo implements Serializable {
     /**
      * id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ExcelProperty(value = "id")
     private Long id;
 
@@ -60,6 +63,7 @@ public class OrderInfoVo implements Serializable {
     /**
      * 会员|id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ExcelProperty(value = "会员|id")
     private Long memberId;
 
