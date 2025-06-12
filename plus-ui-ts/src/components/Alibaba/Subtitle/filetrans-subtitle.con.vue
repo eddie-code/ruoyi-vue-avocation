@@ -1,8 +1,6 @@
 <template>
-  <a-modal v-model:open="open" title="Basic Modal" @ok="handleOk">
-    <p>Some contents...</p>
-    <p>Some contents...</p>
-    <p>Some contents...</p>
+  <a-modal v-model:open="open" title="生成字幕" @ok="handleOk">
+    <p>{{ filetrans }}</p>
   </a-modal>
 </template>
 
@@ -10,8 +8,11 @@
 import { ref } from 'vue';
 
 const open = ref(false);
+const filetrans = ref(false);
+filetrans.value = {};
 
-const showModal = () => {
+const showModal = (_filetrans) => {
+  filetrans.value = _filetrans;
   open.value = true;
 };
 

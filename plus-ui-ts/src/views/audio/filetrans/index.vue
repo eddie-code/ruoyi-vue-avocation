@@ -6,7 +6,7 @@
           <el-form ref="queryFormRef" :model="queryParams" :inline="true">
             <el-form-item>
               <el-button type="primary" icon="UploadFilled" @click="showModal">上传音频</el-button>
-              <FiletransUpload ref="filetransUploadCom"></FiletransUpload>
+              <FiletransUpload ref="filetransUploadView"></FiletransUpload>
               <FiletransSubtitle ref="filetransSubtitleCom"></FiletransSubtitle>
               <el-button icon="Refresh" @click="resetQuery">刷新列表</el-button>
             </el-form-item>
@@ -98,6 +98,7 @@
 import { listFiletrans } from '@/api/audio/filetrans';
 import { FiletransVO, FiletransQuery, FiletransForm } from '@/api/audio/filetrans/types';
 import FiletransUpload from '../voiceRecognition/filetrans-upload.vue';
+import FiletransSubtitle from '@/components/Alibaba/Subtitle/filetrans-subtitle.con.vue';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
@@ -113,13 +114,13 @@ const total = ref(0);
 const queryFormRef = ref<ElFormInstance>();
 const filetransFormRef = ref<ElFormInstance>();
 
-const filetransUploadCom = ref();
+const filetransUploadView = ref();
 const filetransSubtitleCom = ref();
 
 const showModal = () => {
   console.log('Button clicked'); // 调试信息
-  if (filetransUploadCom.value) {
-    filetransUploadCom.value.showModal();
+  if (filetransUploadView.value) {
+    filetransUploadView.value.showModal();
     console.log('showModal 在 FiletransUpload 上调用'); // 调试信息
   } else {
     console.error('filetransUploadCom 未定义'); // 错误信息
@@ -130,6 +131,7 @@ const showSubtitleModal = (row: FiletransVO) => {
   console.log('查看字幕', row.id);
   if (filetransSubtitleCom.value) {
     filetransSubtitleCom.value.showModal(row);
+    console.log('showSubtitleModal 在 filetransSubtitleCom 上调用'); // 调试信息
   } else {
     console.error('filetransSubtitleCom 未定义');
   }
