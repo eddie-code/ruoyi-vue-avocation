@@ -1,6 +1,13 @@
 import request from '@/utils/request';
 import { AxiosPromise } from 'axios';
-import { FiletransVO, FiletransForm, FiletransQuery } from '@/api/audio/filetrans/types';
+import {
+  FiletransVO,
+  FiletransForm,
+  FiletransQuery,
+  FiletransSubtitleQuery,
+  SubtitleItem,
+  TableDataInfo
+} from '@/api/audio/filetrans/types';
 
 /**
  * 查询语音识别列表
@@ -11,6 +18,20 @@ import { FiletransVO, FiletransForm, FiletransQuery } from '@/api/audio/filetran
 export const listFiletrans = (query?: FiletransQuery): AxiosPromise<FiletransVO[]> => {
   return request({
     url: '/web/filetrans/list',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
+ * 查询字幕分页列表
+ * @param query 查询参数
+ */
+export const listFiletransSubtitle = (
+  query: FiletransSubtitleQuery
+): AxiosPromise<TableDataInfo<SubtitleItem>> => {
+  return request({
+    url: '/web/filetransSubtitle/list',
     method: 'get',
     params: query
   });

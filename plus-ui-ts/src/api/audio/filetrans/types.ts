@@ -248,4 +248,33 @@ export interface FiletransQuery extends PageQuery {
 }
 
 
+// 新增字幕列表接口 =============================================
+export interface FiletransSubtitleQuery {
+  /** 文件转换ID */
+  filetransId: string | number;
+  /** 页码 */
+  pageNum?: number;
+  /** 每页大小 */
+  pageSize?: number;
+}
 
+export interface SubtitleItem {
+  /** 开始时间 */
+  startTime: string;
+  /** 结束时间 */
+  endTime: string;
+  /** 字幕内容 */
+  subtitle: string;
+}
+
+// 修正为后端实际返回结构
+export interface TableDataInfo<T> {
+  /** 状态码 */
+  code: number;
+  /** 消息 */
+  msg: string;
+  /** 总记录数 */
+  total: number;
+  /** 列表数据 */
+  rows: T[];
+}
