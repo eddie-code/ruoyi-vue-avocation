@@ -27,3 +27,6 @@ pnpm-lock.yaml
 # 编译生成的文件
 auto-imports.d.ts
 components.d.ts
+
+# Vite 临时缓存文件（重点添加）
+vite.config.ts.timestamp-*
