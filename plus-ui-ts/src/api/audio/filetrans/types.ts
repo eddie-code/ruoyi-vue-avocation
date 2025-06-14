@@ -248,7 +248,7 @@ export interface FiletransQuery extends PageQuery {
 }
 
 
-// 新增字幕列表接口 =============================================
+// 字幕列表接口 =============================================
 export interface FiletransSubtitleQuery {
   /** 文件转换ID */
   filetransId: string | number;
@@ -267,7 +267,7 @@ export interface SubtitleItem {
   subtitle: string;
 }
 
-// 修正为后端实际返回结构
+// 后端实际返回结构
 export interface TableDataInfo<T> {
   /** 状态码 */
   code: number;
@@ -277,4 +277,10 @@ export interface TableDataInfo<T> {
   total: number;
   /** 列表数据 */
   rows: T[];
+}
+
+// 下载字幕列表接口 =============================================
+export interface GenSubtitleBo {
+  /** 文件转换ID */
+  filetransId: string | number;
 }

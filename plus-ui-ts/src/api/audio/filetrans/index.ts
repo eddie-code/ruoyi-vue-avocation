@@ -6,7 +6,8 @@ import {
   FiletransQuery,
   FiletransSubtitleQuery,
   SubtitleItem,
-  TableDataInfo
+  TableDataInfo,
+  GenSubtitleBo
 } from '@/api/audio/filetrans/types';
 
 /**
@@ -34,6 +35,18 @@ export const listFiletransSubtitle = (
     url: '/web/filetransSubtitle/list',
     method: 'get',
     params: query
+  });
+};
+
+/**
+ * 下载字幕接口
+ * @param bo
+ */
+export const genSubtitle = (bo: GenSubtitleBo): AxiosPromise<any> => {
+  return request({
+    url: '/web/filetransSubtitle/genSubtitle',
+    method: 'get',
+    params: bo
   });
 };
 
