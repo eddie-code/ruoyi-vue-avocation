@@ -1,24 +1,35 @@
 <template>
   <div>
     <!-- 隐藏的文件输入框 -->
-    <input type="file" style="display: none" ref="fileUploadCom" accept=".mp3,.wav,.m4a" @change="handleFileChange"/>
+    <input
+      type="file"
+      style="display: none"
+      ref="fileUploadCom"
+      accept=".mp3,.wav,.m4a"
+      @change="handleFileChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
-import {notification} from 'ant-design-vue';
-import {getCredentialsApi, calculateAmountApi, payApi} from '@/api/audio/voiceRecognition/filetrans-upload';
+import { ref } from 'vue';
+import { notification } from 'ant-design-vue';
+import { getCredentialsApi, calculateAmountApi, payApi } from '@/api/audio/voiceRecognition/filetrans-upload';
 import md5 from 'js-md5';
-import {PayForm} from '@/api/audio/voiceRecognition/types';
+import { PayForm } from '@/api/audio/voiceRecognition/types';
 
+// ======================== DOM引用 ========================
 /**
- * 文件输入框DOM引用
+ * 文件上传输入框的DOM引用
  */
 const fileUploadCom = ref<HTMLInputElement | null>(null);
 
+// ======================== 变量声明 ========================
 /**
  * 阿里云上传凭证信息
+ * @type {string} uploadAuth - 上传授权凭证
+ * @type {string} uploadAddress - 上传地址
+ * @type {string} videoId - 视频资源ID
  */
 let uploadAuth: string;
 let uploadAddress: string;
@@ -26,6 +37,13 @@ let videoId: string;
 
 /**
  * 文件上传状态（响应式）
+ * @property {string} name - 文件名
+ * @property {number} percent - 上传进度百分比
+ * @property {string} lang - 音频语言
+ * @property {string} audioAddr - 音频地址
+ * @property {string} fileSign - 文件签名
+ * @property {string} vod - 视频点播ID
+ * @property {string} channel - 支付渠道(A:支付宝)
  */
 const filetrans = ref({
   name: '',
@@ -38,46 +56,23 @@ const filetrans = ref({
 });
 
 /**
- * 重置上传状态
- * 1. 清空文件名和进度
- * 2. 重置文件输入框
+ * 金额响应式变量
  */
-const resetFileTrans = () => {
-  filetrans.value = {
-    name: '',
-    percent: 0,
-    lang: "",
-    audioAddr: "",
-    fileSign: "",
-    vod: "",
-    channel: "A" // 默认值, 支付宝
-  };
-  if (fileUploadCom.value) {
-    fileUploadCom.value.value = '';
-  }
-
-  console.log('上传状态已重置');
-};
-
-// 金额响应式变量
 const amount = ref<number>(0);
 
+// ======================== 阿里云上传器配置 ========================
 /**
  * 阿里云VOD上传实例
+ * @see https://help.aliyun.com/document_detail/51992.html
  */
 const uploader = new AliyunUpload.Vod({
-  //userID，必填，只需有值即可。
-  userId: '122',
-  //分片大小默认1 MB (1048576)，不能小于100 KB
-  partSize: 104858,
-  //并行上传分片个数，默认5
-  parallel: 5,
-  //网络原因失败时，重新上传次数，默认为3
-  retryCount: 3,
-  //网络原因失败时，重新上传间隔时间，默认为2秒
-  retryDuration: 2,
-  //是否上报上传日志到视频点播，默认为true
-  enableUploadProgress: true,
+  // 必填配置
+  userId: '122', // 用户ID，只需有值即可
+  partSize: 104858, // 分片大小(默认1MB)，不能小于100KB
+  parallel: 5, // 并行上传分片个数
+  retryCount: 3, // 失败重试次数
+  retryDuration: 2, // 重试间隔(秒)
+  enableUploadProgress: true, // 是否上报上传日志
 
   // 上传开始回调
   onUploadstarted(uploadInfo) {
@@ -90,7 +85,6 @@ const uploader = new AliyunUpload.Vod({
     const fileUrl = uploadInfo.endpoint.replace('https://', 'https://' + uploadInfo.bucket + '.') + '/' + uploadInfo.object;
     console.log('上传成功:', fileUrl);
     emit('upload-success', fileUrl);
-    // 关键修复：上传成功后再触发金额计算
     calculateAmount(videoId); // 确保使用最新的videoId
     filetrans.value.audioAddr = fileUrl;
   },
@@ -98,7 +92,7 @@ const uploader = new AliyunUpload.Vod({
   // 上传失败回调
   onUploadFailed(uploadInfo, code, message) {
     console.log('上传失败:', uploadInfo.file.name, 'code:', code, 'message:', message);
-    emit('upload-failed', {code, message});
+    emit('upload-failed', { code, message });
   },
 
   // 上传进度回调
@@ -118,20 +112,61 @@ const uploader = new AliyunUpload.Vod({
   // 上传结束回调
   onUploadEnd() {
     console.log('上传流程结束');
-    // resetFileTrans(); // 上传完成后自动重置
+    // resetFileTrans(); // 上传完成后自动重置(已注释)
   }
 });
 
+// ======================== 事件定义 ========================
 /**
- * 新增：金额计算接口
- * @param videoId 视频ID
+ * 组件事件定义
+ * @event upload-success - 上传成功事件
+ * @event upload-failed - 上传失败事件
+ * @event upload-progress - 上传进度事件
+ * @event amount-calculated - 金额计算完成事件
+ * @event pay-success - 支付成功事件
+ * @event trigger-alipay - 触发支付宝支付事件
+ */
+const emit = defineEmits([
+  'upload-success',
+  'upload-failed',
+  'upload-progress',
+  'amount-calculated',
+  'pay-success',
+  'trigger-alipay'
+]);
+
+// ======================== 核心方法 ========================
+/**
+ * 重置上传状态
+ * 1. 清空文件名和进度
+ * 2. 重置文件输入框
+ */
+const resetFileTrans = () => {
+  filetrans.value = {
+    name: '',
+    percent: 0,
+    lang: "",
+    audioAddr: "",
+    fileSign: "",
+    vod: "",
+    channel: "A"
+  };
+  if (fileUploadCom.value) {
+    fileUploadCom.value.value = '';
+  }
+  console.log('上传状态已重置');
+};
+
+/**
+ * 金额计算接口
+ * @param {string} videoId - 视频ID
  */
 const calculateAmount = async (videoId: string) => {
   calculateAmountApi(videoId)
     .then((response: any) => {
       if (response.code === 200) {
         console.log('金额接口返回:', response.data);
-        amount.value = response.data; // 保存金额
+        amount.value = response.data;
         emit('amount-calculated', response.data);
       } else {
         throw new Error(response.msg || '金额计算失败');
@@ -143,53 +178,44 @@ const calculateAmount = async (videoId: string) => {
         message: '费用计算失败',
         description: error.message || '无法获取预估费用'
       });
-      emit('amount-calculated', '0.00'); // 失败时重置金额
+      emit('amount-calculated', '0.00');
     });
 };
 
-// 支付处理方法
+/**
+ * 支付处理方法
+ */
 const handlePay = () => {
   if (!filetrans.value.vod) {
-    notification.error({message: '支付失败', description: '未获取到视频ID'});
+    notification.error({ message: '支付失败', description: '未获取到视频ID' });
     return;
   }
 
   const payData: PayForm = {
     name: filetrans.value.name,
-    percent: filetrans.value.percent, // 根据实际需求调整
+    percent: filetrans.value.percent,
     amount: amount.value,
-    lang: filetrans.value.lang, // lang是指音频语言
+    lang: filetrans.value.lang,
     audio: filetrans.value.audioAddr,
     fileSign: filetrans.value.fileSign,
     vod: filetrans.value.vod,
-    channel: filetrans.value.channel // 使用从父组件传递过来的channel
+    channel: filetrans.value.channel
   };
 
-  console.log('下单请求数据:', payData); // 调试日志
+  console.log('下单请求数据:', payData);
 
   payApi(payData)
     .then(response => {
-      console.log('支付响应:', response); // 调试日志
+      console.log('支付响应:', response);
       if (response.code === 200) {
         notification.success({
           message: '系统提示',
           description: '下单成功, 订单号：' + response.data.orderNo
         });
-        emit('pay-success'); // 可选：触发支付成功事件
-        // // 处理支付宝返回的表单
-        // let divForm = document.getElementsByTagName('divform');
-        // if (divForm.length) {
-        //   document.body.removeChild(divForm[0])
-        // }
-        // const div = document.createElement('divform');
-        // // 支付宝返回的form
-        // div.innerHTML = response.data.channelResult;
-        // document.body.appendChild(div);
-        // document.forms[0].setAttribute('target', '_blank');
-        // document.forms[0].submit();
-        // 判断支付渠道并调用支付宝组件
+        emit('pay-success');
+
+        // 支付宝支付渠道处理
         if (filetrans.value.channel === "A") {
-          // 通过事件将支付信息传递给父组件
           emit('trigger-alipay', {
             amount: amount.value,
             qrcode: response.data.channelResult,
@@ -199,23 +225,13 @@ const handlePay = () => {
       }
     })
     .catch(error => {
-      console.error('支付错误:', error); // 调试日志
+      console.error('支付错误:', error);
       notification.error({
         message: '系统提示',
         description: error.message || '下单失败'
       });
     });
 };
-
-// 更新事件定义
-const emit = defineEmits([
-  'upload-success',
-  'upload-failed',
-  'upload-progress',
-  'amount-calculated', // 新增金额事件
-  'pay-success', // 触发支付成功事件
-  'trigger-alipay' // 触发支付状态事件
-]);
 
 /**
  * 处理文件选择变化
@@ -227,7 +243,7 @@ const handleFileChange = () => {
   }
 
   const file = fileUploadCom.value.files[0];
-  const maxSize = 500 * 1024 * 1024; // 500MB
+  const maxSize = 500 * 1024 * 1024; // 500MB限制
 
   // 文件大小校验
   if (file.size > maxSize) {
@@ -249,36 +265,34 @@ const handleFileChange = () => {
     channel: ""
   };
 
-  // 生成文件唯一标识
+  // 生成文件唯一标识(MD5)
   const fileHash = md5(file.name + file.type + file.size + file.lastModified);
   const fileKey = fileHash.substring(0, 16);
   filetrans.value.fileSign = fileKey;
 
   // 获取上传凭证
-  getCredentialsApi({name: file.name, key: fileKey})
+  getCredentialsApi({ name: file.name, key: fileKey })
     .then((response) => {
       if (response.code !== 200) throw new Error(response.msg);
 
-      // 已上传过的文件直接返回URL
+      // 已上传过的文件处理
       if (response.data.fileUrl) {
         console.log('文件已上传过:', response.data.fileUrl);
         filetrans.value.percent = 100;
         emit('upload-success', response.data.fileUrl);
-        videoId = response.data.videoId; // 确保videoId更新
-        // 关键新增：立即触发预计算（可选）
+        videoId = response.data.videoId;
         calculateAmount(videoId);
         filetrans.value.audioAddr = response.data.fileUrl;
         filetrans.value.vod = videoId;
         return;
       }
 
-      // 使用阿里云SDK方法新文件开始上传
+      // 新文件上传流程
       console.log('新文件开始上传:', response.data);
       uploadAuth = response.data.uploadAuth;
       uploadAddress = response.data.uploadAddress;
-      videoId = response.data.videoId; // 确保videoId更新
+      videoId = response.data.videoId;
       filetrans.value.vod = videoId;
-      // 关键新增：立即触发预计算（可选）
       calculateAmount(videoId);
       uploader.addFile(file);
       uploader.startUpload();
@@ -306,7 +320,14 @@ const selectFile = () => {
   }
 };
 
-// 暴露支付方法给父组件（如果需要在外部调用）
+// ======================== 暴露方法 ========================
+/**
+ * 向父组件暴露的方法
+ * @method selectFile - 触发文件选择
+ * @method resetFileTrans - 重置上传状态
+ * @method filetrans - 上传状态对象
+ * @method handlePay - 支付处理方法
+ */
 defineExpose({
   selectFile,
   resetFileTrans,

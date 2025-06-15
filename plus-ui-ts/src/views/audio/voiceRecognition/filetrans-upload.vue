@@ -8,7 +8,7 @@
 
     <p></p>
 
-    <!-- 更新组件事件监听 -->
+    <!-- 文件上传组件 -->
     <FiletransUploadCom
       ref="fileUploader"
       @upload-success="handleUploadSuccess"
@@ -17,20 +17,28 @@
       @trigger-alipay="handleTriggerAlipay"
     />
 
-    <!-- 上传状态显示 -->
+    <!-- 文件及金额信息展示 -->
     <p>
-      已选择文件：{{ fileName }} <span v-show="calAmount !== '0.00'">，金额：<b style="color: red; font-size: 18px">{{calAmount}}</b> &nbsp;元</span>
+      已选择文件：{{ fileName }}
+      <span v-show="calAmount !== '0.00'">
+        ，金额：<b style="color: red; font-size: 18px">{{calAmount}}</b> &nbsp;元
+      </span>
     </p>
+
+    <!-- 上传进度展示 -->
     <p>
       <a-progress :percent="uploadPercent" />
     </p>
+
+    <!-- 语言选择 -->
     <p>
       音频语言：
       <a-select v-model:value="lang" style="width: 120px">
         <a-select-option v-for="o in FILETRANS_LANG_ARRAY" :value="o.code">{{o.desc}}</a-select-option>
       </a-select>
     </p>
-    <!-- 添加支付方式选择 -->
+
+    <!-- 支付方式选择 -->
     <p>
       支付方式：
       <a-radio-group name="radioGroup" v-model:value="channel">
@@ -39,9 +47,10 @@
       </a-radio-group>
     </p>
 
+    <!-- 支付宝支付组件 -->
     <AlipayCom ref="alipayCom" @after-pay="handleAfterPay" />
 
-    <!-- 模态框其他内容 -->
+    <!-- 文件格式提示 -->
     <p>支持格式：.mp3, .wav, .m4a，最大500MB</p>
   </a-modal>
 </template>
@@ -54,8 +63,30 @@ import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
 import { isEmpty } from 'radash';
 import AlipayCom from '@/components/Alibaba/OrderInfo/alipay-com.vue';
 
+/**
+ * 响应式数据
+ */
+const open = ref(false); // 模态框显示状态
+const channel = ref<string>('A'); // 支付方式，默认支付宝
+const lang = ref<string>(''); // 选择的语言
+const calAmount = ref('0.00'); // 计算金额
+const fileUploader = ref<FileUploaderExpose>(); // 文件上传组件引用
+const alipayCom = ref<InstanceType<typeof AlipayCom>>(); // 支付宝组件引用
+const FILETRANS_LANG_ARRAY = ref(window.FILETRANS_LANG_ARRAY); // 语言选项数组
 
-// 添加金额格式化方法
+/**
+ * 计算属性
+ */
+// 当前选择的文件名
+const fileName = computed(() => fileUploader.value?.filetrans?.name || '未选择文件');
+// 当前上传进度
+const uploadPercent = computed(() => fileUploader.value?.filetrans?.percent || 0);
+
+/**
+ * 金额格式化方法
+ * @param amount 原始金额
+ * @returns 格式化后的金额字符串
+ */
 const formatAmount = (amount: string) => {
   return parseFloat(amount).toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
@@ -63,38 +94,40 @@ const formatAmount = (amount: string) => {
   });
 };
 
-// 处理支付宝弹窗的方法
-const alipayCom = ref<InstanceType<typeof AlipayCom>>(); // 明确组件类型
-
 /**
- * 添加支付方式响应式变量
+ * 重置金额显示
  */
-const channel = ref<string>('A'); // 默认支付宝
+const resetAmount = () => {
+  calAmount.value = '0.00';
+};
+
 /**
- * 控制模态框显示/隐藏的状态
+ * 显示模态框
  */
-const open = ref(false);
-
-const FILETRANS_LANG_ARRAY = ref(window.FILETRANS_LANG_ARRAY)
-
-const lang = ref<string>(''); // 语言选择状态
+const showModal = () => {
+  open.value = true;
+  fileUploader.value?.resetFileTrans(); // 重置上传状态
+  resetAmount(); // 重置金额
+  lang.value = ''; // 重置语言选择
+};
 
 /**
- * 文件上传组件引用（包含类型提示）
+ * 文件选择按钮点击事件
  */
-const fileUploader = ref<FileUploaderExpose>();
-
-const calAmount = ref('0.00'); // 金额响应式变量
+const handleClick = () => {
+  showModal();
+  fileUploader.value?.selectFile(); // 触发文件选择
+};
 
 /**
- * 处理金额计算结果（增强类型安全）
+ * 处理金额计算结果
+ * @param amount 金额数值或字符串
  */
 const handleAmountCalculated = (amount: string | number) => {
   try {
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    // 确保返回标准的两位小数格式
     calAmount.value = isNaN(numericAmount) || numericAmount === 0
-      ? '0.00'  // 明确处理0值情况
+      ? '0.00'
       : numericAmount.toFixed(2);
   } catch {
     calAmount.value = '0.00';
@@ -102,23 +135,32 @@ const handleAmountCalculated = (amount: string | number) => {
 };
 
 /**
- * 支付状态检查
+ * 上传成功处理
+ * @param fileUrl 上传成功的文件URL
  */
-const handleAfterPay = (status: string) => {
-  if (status === 'S') {
-    notification['success']({
-      message: '支付宝支付提示',
-      description: "支付成功，感谢您的使用！",
-    });
-    open.value = false; // 关闭上传模态框
-  } else {
-    notification['error']({
-      message: '支付宝支付失败',
-      description: "支付失败！请重新发起支付！",
-    });
-  }
+const handleUploadSuccess = (fileUrl: string) => {
+  calAmount.value = '0.00';
+  notification.success({
+    message: '上传成功',
+    description: '文件已上传至：' + fileUrl
+  });
 };
 
+/**
+ * 上传失败处理
+ * @param param0 错误对象 { code: number; message: string }
+ */
+const handleUploadFailed = ({ code, message }: { code: number; message: string }) => {
+  notification.error({
+    message: `上传失败 (${code})`,
+    description: message || '未知错误'
+  });
+};
+
+/**
+ * 支付宝支付触发
+ * @param payInfo 支付信息
+ */
 const handleTriggerAlipay = (payInfo: any) => {
   alipayCom.value?.handleOpen({
     amount: payInfo.amount,
@@ -129,54 +171,45 @@ const handleTriggerAlipay = (payInfo: any) => {
 };
 
 /**
- * 重置金额显示（增强可靠性）
+ * 支付结果处理
+ * @param status 支付状态
  */
-const resetAmount = () => {
-  calAmount.value = '0.00';
+const handleAfterPay = (status: string) => {
+  if (status === 'S') {
+    notification['success']({
+      message: '支付宝支付提示',
+      description: "支付成功，感谢您的使用！",
+    });
+    open.value = false;
+  } else {
+    notification['error']({
+      message: '支付宝支付失败',
+      description: "支付失败！请重新发起支付！",
+    });
+  }
 };
 
 /**
- * 计算属性：当前选择的文件名（未选择时显示默认文本）
- */
-const fileName = computed(() => fileUploader.value?.filetrans?.name || '未选择文件');
-
-/**
- * 计算属性：当前上传进度百分比（默认0）
- */
-const uploadPercent = computed(() => fileUploader.value?.filetrans?.percent || 0);
-
-/**
- * 显示模态框并重置上传状态
- */
-const showModal = () => {
-  open.value = true;
-  fileUploader.value?.resetFileTrans(); // 每次打开时重置状态
-  resetAmount(); // 每次打开模态框时重置金额
-  lang.value = '';
-};
-
-/**
- * 处理模态框结算按钮
- * @param e 事件对象
+ * 结算按钮处理
+ * @param e 鼠标事件
  */
 const pay = (e: MouseEvent) => {
   console.log('处理模态框结算按钮', e);
 
-  // 同步语言到FileUploader组件
+  // 同步语言和支付方式到上传组件
   if (fileUploader.value) {
     fileUploader.value.filetrans.lang = lang.value;
-    fileUploader.value.filetrans.channel = channel.value; // 传递支付方式
+    fileUploader.value.filetrans.channel = channel.value;
   }
 
-  // 合并 filetrans 和 lang 到新对象
   const mergedData = {
-    ...fileUploader.value?.filetrans, // 展开原始 filetrans 数据
-    lang: lang.value                  // 添加当前选择的语言
+    ...fileUploader.value?.filetrans,
+    lang: lang.value
   };
 
   console.log('准备结算：', JSON.stringify(mergedData));
 
-  // 检查音频地址
+  // 验证音频地址
   if (isEmpty(fileUploader.value?.filetrans?.audioAddr)) {
     notification.error({
       message: '系统提示',
@@ -185,7 +218,7 @@ const pay = (e: MouseEvent) => {
     return;
   }
 
-  // 检查语言选择（lang是本地响应式变量）
+  // 验证语言选择
   if (isEmpty(lang.value)) {
     notification.error({
       message: '系统提示',
@@ -194,9 +227,8 @@ const pay = (e: MouseEvent) => {
     return;
   }
 
-  // 检查金额（使用已计算的金额值）
+  // 验证金额
   if (calAmount.value === '0.00' || calAmount.value === '0') {
-    // 当计算金额的值为 '0.00' 或 '0' 时，执行特定的逻辑
     notification.error({
       message: '系统提示',
       description: "金额不能为0",
@@ -204,45 +236,10 @@ const pay = (e: MouseEvent) => {
     return;
   }
 
-  // 通过ref获取FileUploader实例
+  // 执行支付
   fileUploader.value?.handlePay();
-
 };
 
-
-/**
- * 处理文件选择按钮点击
- * 先显示模态框，然后触发文件选择
- */
-const handleClick = () => {
-  showModal();
-  fileUploader.value?.selectFile();
-};
-
-/**
- * 处理上传成功事件
- * @param fileUrl 上传成功的文件URL
- */
-const handleUploadSuccess = (fileUrl: string) => {
-  calAmount.value = '0.00'; // 保持字符串类型一致性
-  notification.success({
-    message: '上传成功',
-    description: '文件已上传至：' + fileUrl
-  });
-};
-
-/**
- * 处理上传失败事件
- * @param code 错误码
- * @param message 错误信息
- */
-const handleUploadFailed = ({ code, message }: { code: number; message: string }) => {
-  notification.error({
-    message: `上传失败 (${code})`,
-    description: message || '未知错误'
-  });
-};
-
-// 暴露给父组件的方法
+// 暴露方法给父组件
 defineExpose({ showModal });
 </script>

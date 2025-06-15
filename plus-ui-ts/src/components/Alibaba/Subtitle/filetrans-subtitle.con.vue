@@ -1,5 +1,28 @@
-:plus-ui-ts/src/components/Alibaba/Subtitle/filetrans-subtitle.con.vue
+<!--
+组件功能说明
+    主要功能：
+        显示字幕生成模态框
+        分页展示字幕列表（时间段+文本）
+        支持下载SRT和TXT两种格式的字幕文件
+        特殊标记第一项和最后一项的时间
+    核心方法：
+        showModal: 打开模态框并加载数据
+        loadData: 加载字幕数据
+        handleDownloadSrt: 下载SRT格式字幕
+        handleDownloadTxt: 下载TXT格式字幕
+        convertSrtToTxt: SRT转TXT格式转换
+    特色功能：
+        时间格式转换（毫秒转HH:mm:ss）
+        首尾时间项特殊样式标记
+        完善的错误处理和加载状态
+        详细的日志输出便于调试
+    使用方式：
+        父组件通过ref调用showModal方法打开模态框
+        内部自动处理数据加载和分页
+        提供两种格式的字幕下载
+-->
 <template>
+  <!-- 字幕生成模态框 -->
   <a-modal
     v-model:open="open"
     title="生成字幕"
@@ -7,21 +30,22 @@
     :footer="null"
     centered
     :modalStyle="{
-    top: '20px',
-    right: '20px',  // 添加右侧间距
-    left: '20px',   // 添加左侧间距
-    transform: 'none', // 移除transform
-    margin: '0 auto', // 水平居中
-    maxWidth: 'calc(100% - 40px)' // 防止溢出
-  }"
+      top: '20px',
+      right: '20px',  // 添加右侧间距
+      left: '20px',   // 添加左侧间距
+      transform: 'none', // 移除transform
+      margin: '0 auto', // 水平居中
+      maxWidth: 'calc(100% - 40px)' // 防止溢出
+    }"
   >
-    <!-- 添加下载按钮 -->
+    <!-- 下载按钮区域 -->
     <div style="margin-bottom: 16px; text-align: right;">
       <!-- 下载SRT字幕按钮 -->
       <a-button
         type="primary"
         @click="handleDownloadSrt"
-        :loading="downloadSrtLoading" style="margin-right: 8px;"
+        :loading="downloadSrtLoading"
+        style="margin-right: 8px;"
       >
         下载SRT字幕
       </a-button>
@@ -35,6 +59,7 @@
       </a-button>
     </div>
 
+    <!-- 字幕表格展示区域 -->
     <a-table
       :columns="columns"
       :data-source="dataList"
@@ -65,21 +90,25 @@
       <!--        </template>-->
       <!--      </template>-->
       <!-- 时间段（增加判断第一个时间与最后一个时间，添加加粗红色的样式） | 字幕 -->
+      <!-- 表格单元格自定义渲染 -->
       <template #bodyCell="{ column, record, index }">
+        <!-- 时间段列渲染 -->
         <template v-if="column.key === 'timeRange'">
+          <!-- 开始时间（如果是第一页第一项则加粗红色显示） -->
           <span :style="pagination.current === 1 && index === 0 ? 'color: red; font-weight: bold' : ''">
             {{ formatTime(record.begin) }}
           </span>
           -
+          <!-- 结束时间（如果是最后一页最后一项则加粗红色显示） -->
           <span :style="isLastPageLastItem(index) ? 'color: red; font-weight: bold' : ''">
-             {{ formatTime(record.end) }}
-         </span>
+            {{ formatTime(record.end) }}
+          </span>
         </template>
+        <!-- 字幕文本列渲染 -->
         <template v-else-if="column.dataIndex === 'text'">
           {{ record.text }}
         </template>
       </template>
-
     </a-table>
   </a-modal>
 </template>
@@ -91,7 +120,10 @@ import type {TableProps} from 'ant-design-vue';
 import {message} from 'ant-design-vue';
 import request from '@/utils/request';
 
-// 表格列定义 - 更新为匹配后端字段
+/**
+ * 表格列配置
+ * 注释掉的代码是旧版的两列配置（开始时间、结束时间分开）
+ */
 // const columns = [
 //   {
 //     title: '开始时间',
@@ -111,6 +143,10 @@ import request from '@/utils/request';
 //     key: 'text',
 //   },
 // ];
+
+/**
+ * 当前使用的表格列配置（时间段合并为一列）
+ */
 const columns = [
   {
     title: '时间段',
@@ -124,23 +160,35 @@ const columns = [
   },
 ];
 
+// 模态框显示状态
 const open = ref(false);
+// 当前处理的文件转换数据
 const filetrans = ref<Record<string, any>>({});
-const dataList = ref<any[]>([]); // 改为 any[] 或定义匹配的类型
+// 字幕数据列表
+const dataList = ref<any[]>([]);
+// 表格加载状态
 const loading = ref(false);
+// TXT下载加载状态
 const downloadLoading = ref(false);
+// SRT下载加载状态
 const downloadSrtLoading = ref(false);
 
-// 分页配置
+/**
+ * 分页配置
+ */
 const pagination = reactive({
-  current: 1,
-  pageSize: 10,
-  total: 0,
-  showSizeChanger: true,
-  pageSizeOptions: ['10', '20', '50'],
+  current: 1,                   // 当前页码
+  pageSize: 10,                 // 每页条数
+  total: 0,                     // 总条数
+  showSizeChanger: true,        // 显示每页条数选择器
+  pageSizeOptions: ['10', '20', '50'], // 可选的每页条数
 });
 
-// 毫秒转换为时间格式 (HH:mm:ss.SSS)
+/**
+ * 将毫秒转换为时间格式 (HH:mm:ss)
+ * @param milliseconds 毫秒数
+ * @returns 格式化后的时间字符串
+ */
 const formatTime = (milliseconds: number): string => {
   const totalSeconds = Math.floor(milliseconds / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -154,7 +202,11 @@ const formatTime = (milliseconds: number): string => {
   // return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
 };
 
-// 在 formatTime 函数下方添加
+/**
+ * 判断当前项是否是最后一页的最后一项
+ * @param index 当前项的索引
+ * @returns 是否是最后一页的最后一项
+ */
 const isLastPageLastItem = (index: number): boolean => {
   // 计算总页数
   const totalPage = Math.ceil(pagination.total / pagination.pageSize);
@@ -168,7 +220,10 @@ const isLastPageLastItem = (index: number): boolean => {
     pagination.total > 0;
 };
 
-// 显示模态框
+/**
+ * 显示模态框
+ * @param _filetrans 文件转换数据
+ */
 const showModal = (_filetrans: any) => {
   filetrans.value = _filetrans;
   open.value = true;
@@ -178,7 +233,9 @@ const showModal = (_filetrans: any) => {
   loadData();
 };
 
-// 加载字幕数据
+/**
+ * 加载字幕数据
+ */
 const loadData = async () => {
   if (!filetrans.value?.id) {
     console.warn('无法加载字幕：缺少文件转换ID');
@@ -217,15 +274,19 @@ const loadData = async () => {
   }
 };
 
-// 处理分页变化
+/**
+ * 处理表格分页变化
+ * @param pag 分页参数
+ */
 const handleTableChange: TableProps['onChange'] = (pag) => {
   pagination.current = pag.current!;
   pagination.pageSize = pag.pageSize!;
   loadData();
 };
 
-// 下载TXT字幕
-// 下载TXT字幕 - 最终修复版本
+/**
+ * 下载TXT字幕文件
+ */
 const handleDownloadTxt = async () => {
   if (!filetrans.value?.id) {
     message.error('无法下载字幕：缺少文件转换ID');
@@ -271,7 +332,11 @@ const handleDownloadTxt = async () => {
   }
 };
 
-// SRT转TXT的转换函数
+/**
+ * 将SRT格式转换为TXT格式
+ * @param srtUrl SRT文件URL
+ * @returns 转换后的TXT内容
+ */
 const convertSrtToTxt = async (srtUrl: string): Promise<string> => {
   try {
     const response = await fetch(srtUrl);
@@ -324,7 +389,11 @@ const convertSrtToTxt = async (srtUrl: string): Promise<string> => {
   }
 };
 
-// 触发浏览器下载（用于下载TXT文件）
+/**
+ * 下载TXT文件
+ * @param content 文件内容
+ * @param filename 文件名
+ */
 const downloadTxtFile = (content: string, filename: string) => {
   const blob = new Blob([content], {type: 'text/plain'});
   const url = URL.createObjectURL(blob);
@@ -342,7 +411,9 @@ const downloadTxtFile = (content: string, filename: string) => {
   }, 100);
 };
 
-// 下载SRT字幕
+/**
+ * 下载SRT字幕文件
+ */
 const handleDownloadSrt = async () => {
   if (!filetrans.value?.id) {
     message.error('无法下载字幕：缺少文件转换ID');
@@ -388,7 +459,11 @@ const handleDownloadSrt = async () => {
   }
 };
 
-// 通用文件下载函数（用于下载SRT文件）
+/**
+ * 通用文件下载函数
+ * @param url 文件URL
+ * @param filename 下载的文件名
+ */
 const downloadFile = (url: string, filename: string) => {
   const a = document.createElement('a');
   a.href = url;
@@ -401,7 +476,6 @@ const downloadFile = (url: string, filename: string) => {
     document.body.removeChild(a);
   }, 100);
 };
-
 
 // 暴露方法给父组件
 defineExpose({
