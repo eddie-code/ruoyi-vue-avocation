@@ -34,6 +34,14 @@ public class WebBizFiletransController extends BaseController {
 
     private final IBizFiletransService bizFiletransService;
 
+    /**
+     * 语音识别支付接口
+     *
+     * @param req 文件传输业务对象，包含支付所需参数
+     * @return 统一响应结果，包含订单支付信息
+     * @throws Exception 支付过程中可能抛出的异常
+     */
+    @SaCheckPermission("web:filetrans:pay")
     @PostMapping("/pay")
     public R<OrderInfoPayVo> pay(@Valid @RequestBody BizFiletransBo req) throws Exception {
         log.info("语音识别支付开始");
@@ -43,13 +51,19 @@ public class WebBizFiletransController extends BaseController {
     }
 
     /**
-     * 自定义分页查询
+     * 分页查询文件传输记录
+     *
+     * @param bo 查询条件对象，需符合QueryGroup验证分组规则
+     * @param pageQuery 分页查询参数
+     * @return 分页数据结果，包含文件传输记录列表
      */
     @SaCheckPermission("web:filetrans:list")
     @GetMapping("/list")
     public TableDataInfo<BizFiletransVo> list(@Validated(QueryGroup.class) BizFiletransQueryBo bo, PageQuery pageQuery) {
-        bo.setMemberId(LoginHelper.getUserId()); // 会员端, 只查询自己的
+        // 设置当前用户ID作为查询条件（会员端只能查询自己的记录）
+        bo.setMemberId(LoginHelper.getUserId());
         return bizFiletransService.queryPageList(bo, pageQuery);
     }
+
 
 }
