@@ -43,24 +43,24 @@ public class StatisticVo {
      */
     private List<StatisticDateVo> registerCountList;
 
-
     /**
      * 近30天语音识别数
      */
     private List<StatisticDateVo> filetransCountList;
 
-//    /**
-//     * 近30天语音识别时长，秒
-//     */
-//    private List<StatisticDateVo> filetransSecondList;
-//
-//    /**
-//     * 近30天订单数
-//     */
-//    private List<StatisticDateVo> orderCountList;
-//
-//    /**
-//     * 近30天订单金额
-//     */
-//    private List<StatisticDateVo> orderAmountList;
+    /**
+     * 近30天语音识别时长，秒
+     */
+    private List<StatisticDateVo> filetransSecondList;
+
+    /**
+     * 近30天订单数
+     */
+    private List<StatisticDateVo> orderCountList;
+
+    /**
+     * 近30天订单金额
+     */
+    private List<StatisticDateVo> orderAmountList;
+
 }

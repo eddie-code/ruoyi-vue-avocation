@@ -53,8 +53,21 @@ public class ReportServiceImpl implements IReportService {
         statisticVo.setFiletransSecond(reportMapper.queryFiletransSecond());
         statisticVo.setOrderCount(reportMapper.queryOrderCount());
         statisticVo.setOrderAmount(reportMapper.queryOrderAmount());
-        statisticVo.setFiletransCountList(
+        // 30天趋势图
+        statisticVo.setRegisterCountList(
             fill30(reportMapper.query30RegisterCount())
+        );
+        statisticVo.setFiletransCountList(
+            fill30(reportMapper.query30FiletransCount())
+        );
+        statisticVo.setFiletransSecondList(
+            fill30(reportMapper.query30FiletransSecond())
+        );
+        statisticVo.setOrderCountList(
+            fill30(reportMapper.query30OrderCount())
+        );
+        statisticVo.setOrderAmountList(
+            fill30(reportMapper.query30OrderAmount())
         );
         return statisticVo;
     }

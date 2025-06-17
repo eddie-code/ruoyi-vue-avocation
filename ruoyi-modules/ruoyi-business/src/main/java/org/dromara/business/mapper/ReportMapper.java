@@ -55,4 +55,33 @@ public interface ReportMapper {
      */
     List<StatisticDateVo> query30RegisterCount();
 
+    /**
+     * 查询近30天的文件传输数量统计
+     *
+     * @return List<StatisticDateVo> 包含日期和对应文件传输数量的统计结果列表
+     */
+    List<StatisticDateVo> query30FiletransCount();
+
+    /**
+     * 查询近30天的文件传输耗时统计（单位：秒）
+     *
+     * @return List<StatisticDateVo> 包含日期和对应文件传输耗时的统计结果列表
+     */
+    List<StatisticDateVo> query30FiletransSecond();
+
+    /**
+     * 查询近30天的订单数量统计
+     *
+     * @return List<StatisticDateVo> 包含日期和对应订单数量的统计结果列表
+     */
+    List<StatisticDateVo> query30OrderCount();
+
+    /**
+     * 查询近30天的订单金额统计
+     *
+     * @return List<StatisticDateVo> 包含日期和对应订单金额的统计结果列表
+     */
+    List<StatisticDateVo> query30OrderAmount();
+
+
 }

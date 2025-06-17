@@ -81,6 +81,84 @@
         group by date_format(create_time,'%m-%d')
     </select>
 
+    <!--
+    查询最近30天文件传输数量统计
+    @resultType org.dromara.common.dependency.business.domain.vo.StatisticDateVo 返回统计结果对象
+    统计内容：
+    - date: 日期(MM-DD格式)
+    - filetransCount: 当日文件传输数量
+    查询条件：
+    - 创建时间在最近30天内
+    - 支付状态为'S'(成功)
+    -->
+    <select id="query30FiletransCount" resultType="org.dromara.common.dependency.business.domain.vo.StatisticDateVo">
+        select date_format(create_time,'%m-%d') as `date`, count(1) as filetransCount
+        from biz_filetrans
+        where date_sub(curdate(), interval 29 day) <![CDATA[<=]]> create_time
+          and pay_status = 'S'
+        group by date_format(create_time, '%m-%d')
+    </select>
+
+    <!--
+    查询最近30天文件传输总时长统计(秒)
+    @resultType org.dromara.common.dependency.business.domain.vo.StatisticDateVo 返回统计结果对象
+    统计内容：
+    - date: 日期(MM-DD格式)
+    - filetransSecond: 当日文件传输总秒数
+    查询条件：
+    - 创建时间在最近30天内
+    - 支付状态为'S'(成功)
+    -->
+    <select id="query30FiletransSecond" resultType="org.dromara.common.dependency.business.domain.vo.StatisticDateVo">
+        select date_format(create_time,'%m-%d') as `date`, sum(second) as filetransSecond
+        from biz_filetrans where date_sub(curdate(), interval 29 day) <![CDATA[<=]]> create_time and pay_status = 'S'
+        group by date_format(create_time,'%m-%d')
+    </select>
+
+    <!--
+    查询最近30天订单数量统计
+    @resultType org.dromara.common.dependency.business.domain.vo.StatisticDateVo 返回统计结果对象
+    统计内容：
+    - date: 日期(MM-DD格式)
+    - orderCount: 当日订单数量
+    查询条件：
+    - 订单时间在最近30天内
+    - 订单状态为'S'(成功)
+    -->
+    <select id="query30OrderCount" resultType="org.dromara.common.dependency.business.domain.vo.StatisticDateVo">
+        select date_format(`order_at`,'%m-%d') as `date`, count(1) as orderCount
+        from order_info
+        where date_sub(curdate(), interval 29 day) <![CDATA[<=]]> `order_at`
+          and status = 'S'
+        group by date_format(`order_at`,'%m-%d')
+    </select>
+
+    <!--
+     * 查询近30天订单金额统计
+     *
+     * 功能说明：
+     * 1. 统计最近30天内每天的订单总金额
+     * 2. 按"月-日"格式分组展示数据
+     *
+     * 查询条件：
+     * 1. 订单创建时间在最近30天内（date_sub(curdate(), interval 29 day) <= order_at）
+     * 2. 订单状态为'S'(成功状态)
+     *
+     * 返回结果：
+     * @resultType org.dromara.common.dependency.business.domain.vo.StatisticDateVo
+     *   - date: 格式化后的日期(MM-dd格式)
+     *   - orderAmount: 当日订单总金额
+     -->
+    <select id="query30OrderAmount" resultType="org.dromara.common.dependency.business.domain.vo.StatisticDateVo">
+        <!-- 查询最近30天的每日订单金额汇总 -->
+        select date_format(`order_at`,'%m-%d') as `date`, sum(amount) as orderAmount
+        from order_info
+        <!-- 时间范围条件：最近30天且状态为成功的订单 -->
+        where date_sub(curdate(), interval 29 day) <![CDATA[<=]]> `order_at`
+        and status = 'S'
+        <!-- 按日期格式分组 -->
+        group by date_format(`order_at`, '%m-%d')
+    </select>
 
 
 </mapper>
