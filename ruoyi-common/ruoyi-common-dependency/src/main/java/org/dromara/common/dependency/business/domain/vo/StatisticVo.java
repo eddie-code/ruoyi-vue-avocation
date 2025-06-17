@@ -38,28 +38,29 @@ public class StatisticVo {
      */
     private BigDecimal orderAmount;
 
-//    /**
-//     * 近30天注册人数
-//     */
-//    private List<StatisticDateResp> registerCountList;
-//
-//    /**
-//     * 近30天语音识别数
-//     */
-//    private List<StatisticDateResp> filetransCountList;
-//
+    /**
+     * 近30天注册人数
+     */
+    private List<StatisticDateVo> registerCountList;
+
+
+    /**
+     * 近30天语音识别数
+     */
+    private List<StatisticDateVo> filetransCountList;
+
 //    /**
 //     * 近30天语音识别时长，秒
 //     */
-//    private List<StatisticDateResp> filetransSecondList;
+//    private List<StatisticDateVo> filetransSecondList;
 //
 //    /**
 //     * 近30天订单数
 //     */
-//    private List<StatisticDateResp> orderCountList;
+//    private List<StatisticDateVo> orderCountList;
 //
 //    /**
 //     * 近30天订单金额
 //     */
-//    private List<StatisticDateResp> orderAmountList;
+//    private List<StatisticDateVo> orderAmountList;
 }

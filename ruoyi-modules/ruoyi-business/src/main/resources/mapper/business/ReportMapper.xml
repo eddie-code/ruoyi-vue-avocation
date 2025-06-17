@@ -58,5 +58,29 @@
           and status = 'S'
     </select>
 
+    <!--
+     * 查询最近30天每日注册用户数统计
+     *
+     * @resultType org.dromara.common.dependency.business.domain.vo.StatisticDateVo 返回统计结果对象列表
+     *             包含日期和对应注册人数
+     *
+     * 查询逻辑：
+     * 1. 从系统用户表中筛选出最近30天的注册记录
+     * 2. 按'月-日'格式分组统计每日注册人数
+     * 3. 返回包含日期和对应数量的统计结果
+     -->
+    <select id="query30RegisterCount" resultType="org.dromara.common.dependency.business.domain.vo.StatisticDateVo">
+        <!-- 查询最近30天每日注册数据 -->
+        SELECT
+        date_format( create_time, '%m-%d' ) AS `date`,
+        count( 1 ) AS num
+        FROM sys_user
+        <!-- 筛选条件：创建时间在最近30天内 -->
+        where date_sub(curdate(), interval 29 day) <![CDATA[<=]]> create_time
+        <!-- 按日期分组统计 -->
+        group by date_format(create_time,'%m-%d')
+    </select>
+
+
 
 </mapper>

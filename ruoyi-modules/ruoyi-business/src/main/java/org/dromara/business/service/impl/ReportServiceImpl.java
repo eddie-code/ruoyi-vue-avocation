@@ -1,6 +1,7 @@
 package org.dromara.business.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.business.mapper.ReportMapper;
@@ -8,14 +9,12 @@ import org.dromara.business.service.IReportService;
 import org.dromara.common.core.constant.CacheConstants;
 import org.dromara.common.core.domain.dto.UserOnlineDTO;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.dependency.business.domain.vo.StatisticDateVo;
 import org.dromara.common.dependency.business.domain.vo.StatisticVo;
 import org.dromara.common.redis.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author lee
@@ -54,6 +53,9 @@ public class ReportServiceImpl implements IReportService {
         statisticVo.setFiletransSecond(reportMapper.queryFiletransSecond());
         statisticVo.setOrderCount(reportMapper.queryOrderCount());
         statisticVo.setOrderAmount(reportMapper.queryOrderAmount());
+        statisticVo.setFiletransCountList(
+            fill30(reportMapper.query30RegisterCount())
+        );
         return statisticVo;
     }
 
@@ -84,6 +86,34 @@ public class ReportServiceImpl implements IReportService {
         Collections.reverse(userOnlineDTOList);
         userOnlineDTOList.removeAll(Collections.singleton(null));
         return userOnlineDTOList.size();
+    }
+
+    /**
+     * 填充30天的统计数据列表，确保返回包含连续30天数据的列表
+     *
+     * @param list 原始统计数据列表，可能不包含完整30天的数据
+     * @return List<StatisticDateVo> 包含连续30天数据的列表，空缺日期会自动补零
+     */
+    public List<StatisticDateVo> fill30(List<StatisticDateVo> list) {
+        List<StatisticDateVo> list30 = new ArrayList<>();
+        Date now = new Date();
+        String dateFormat = "MM-dd";
+
+        // 生成最近30天的日期列表，并检查原始数据是否存在对应日期的记录
+        for (int i = 29; i >= 0; i--) {
+            String date = DateUtil.format(DateUtil.offsetDay(now, -i), dateFormat);
+            Optional<StatisticDateVo> registerCountOptional = list.stream().filter(o -> date.equals(o.getDate())).findFirst();
+
+            if (registerCountOptional.isPresent()) {
+                // 如果原始数据中存在该日期的记录，则直接添加
+                list30.add(registerCountOptional.get());
+            } else {
+                // 原始数据中不存在该日期的记录，创建零值记录
+                StatisticDateVo statisticDateResp = new StatisticDateVo(date, 0);
+                list30.add(statisticDateResp);
+            }
+        }
+        return list30;
     }
 
 

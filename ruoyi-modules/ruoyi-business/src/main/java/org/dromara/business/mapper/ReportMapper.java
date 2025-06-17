@@ -1,8 +1,10 @@
 package org.dromara.business.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.dromara.common.dependency.business.domain.vo.StatisticDateVo;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Mapper
 public interface ReportMapper {
@@ -42,5 +44,15 @@ public interface ReportMapper {
      */
     BigDecimal queryOrderAmount();
 
+    /**
+     * 查询最近30天的注册用户数量统计
+     *
+     * 该函数用于获取系统最近30天内每天的注册用户数量统计信息，返回的数据通常用于展示用户增长趋势图表或报表
+     *
+     * @return List<StatisticDateVo> 包含30天注册统计数据的列表，每个StatisticDateVo对象包含日期和对应日期的注册用户数
+     *         返回的列表按日期升序排列，最早日期在前，最近日期在后
+     *         如果某天没有注册用户，对应的统计对象中注册数应为0
+     */
+    List<StatisticDateVo> query30RegisterCount();
 
 }
