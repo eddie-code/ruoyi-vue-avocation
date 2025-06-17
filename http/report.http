@@ -1,0 +1,7 @@
+GET http://localhost:8080/admin/report/queryStatistic
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Clientid: {{clientId}}
+
+###
+

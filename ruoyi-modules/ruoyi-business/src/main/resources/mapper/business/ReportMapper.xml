@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.dromara.business.mapper.ReportMapper">
+
+    <!--
+    查询今日注册用户数
+    @result java.lang.Integer 返回今日注册用户总数
+    -->
+    <select id="queryRegisterCount" resultType="java.lang.Integer">
+        select count(1)
+        from `sys_user`
+        where to_days(create_time) = to_days(now())
+    </select>
+
+    <!--
+    查询今日成功支付的文件传输记录数
+    @result java.lang.Integer 返回今日支付状态为'S'的文件传输记录总数
+    -->
+    <select id="queryFiletransCount" resultType="java.lang.Integer">
+        select count(1)
+        from biz_filetrans
+        where to_days(create_time) = to_days(now())
+          and pay_status = 'S'
+    </select>
+
+    <!--
+    查询今日成功支付的文件传输总时长(秒)
+    @result java.lang.Integer 返回今日支付状态为'S'的文件传输总秒数
+    对于文件传输时长查询，使用了IFNULL函数（MySQL特有），作用与COALESCE相同
+    -->
+    <select id="queryFiletransSecond" resultType="java.lang.Integer">
+        select IFNULL(sum(second), 0)
+        from biz_filetrans
+        where to_days(create_time) = to_days(now())
+          and pay_status = 'S'
+    </select>
+
+    <!--
+    查询今日成功订单数量
+    @result java.lang.Integer 返回今日状态为'S'的订单总数
+    -->
+    <select id="queryOrderCount" resultType="java.lang.Integer">
+        select count(1)
+        from order_info
+        where to_days(order_at) = to_days(now())
+          and status = 'S';
+    </select>
+
+    <!--
+    查询今日成功订单总金额
+    @result java.math.BigDecimal 返回今日状态为'S'的订单金额总和
+    对于订单金额查询，使用了COALESCE函数（MySQL和PostgreSQL都支持），当sum结果为NULL时返回0
+    -->
+    <select id="queryOrderAmount" resultType="java.math.BigDecimal">
+        select COALESCE(sum(amount), 0)
+        from order_info
+        where to_days(order_at) = to_days(now())
+          and status = 'S'
+    </select>
+
+
+</mapper>
