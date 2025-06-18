@@ -124,3 +124,8 @@ API ruoyi-vue/src/api/monitor/report/index.ts
 实体与接口 ruoyi-vue/src/api/monitor/report/types.ts
 
 `按上面说的去做，就可以新建一个新的模块`
+
+
+### 11111111
+
+[Apache ECharts 一个基于 JavaScript 的开源可视化图表库](https://echarts.apache.org/zh/index.html)

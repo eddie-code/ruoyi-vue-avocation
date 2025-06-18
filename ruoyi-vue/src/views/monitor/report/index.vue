@@ -11,17 +11,25 @@
         <span class="value">{{ item.value }}</span>
       </div>
     </div>
+
+    <!-- 新增的图表组件 -->
+    <statistic-charts v-if="!loading && !error" :statisticData="statisticDataObj" />
   </div>
 </template>
 
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
 import { queryStatistic } from '@/api/monitor/report';
+import StatisticCharts from './statistic-charts.vue'; // 引入图表组件
 
 export default defineComponent({
   name: 'StatisticIndex',
+  components: {
+    StatisticCharts // 注册组件
+  },
   setup() {
     const statisticData = ref([]);
+    const statisticDataObj = ref({}); // 用于存储整个统计数据对象
     const loading = ref(true);
     const error = ref('');
 
@@ -36,13 +44,17 @@ export default defineComponent({
         // 确保数据结构正确
         const data = response.data || {};
 
+        // 存储整个数据对象，用于图表
+        statisticDataObj.value = data;
+
+        // 更新顶部统计数据
         statisticData.value = [
           { label: '在线人数', value: data.onlineCount || 0 },
           { label: '注册人数', value: data.registerCount || 0 },
           { label: '订单数', value: data.orderCount || 0 },
-          { label: '订单金额', value: data.orderAmount || 0 },
+          { label: '订单金额', value: formatAmount(data.orderAmount) || '0.00' },
           { label: '语音识别次数', value: data.filetransCount || 0 },
-          { label: '语音识别时长', value: data.filetransSecond || 0 },
+          { label: '语音识别时长(秒)', value: data.filetransSecond || 0 },
         ];
       } catch (err) {
         console.error('获取统计数据失败:', err);
@@ -52,12 +64,19 @@ export default defineComponent({
       }
     };
 
+    // 格式化金额
+    const formatAmount = (amount) => {
+      if (!amount) return '0.00';
+      return parseFloat(amount).toFixed(2);
+    };
+
     onMounted(() => {
       fetchStatistic();
     });
 
     return {
       statisticData,
+      statisticDataObj,
       loading,
       error
     };
