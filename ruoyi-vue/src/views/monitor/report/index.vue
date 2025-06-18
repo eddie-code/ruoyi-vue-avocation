@@ -93,7 +93,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between; /* 平均分配每个统计项 */
-  background-color: #f5f7fa; /* 背景颜色 */
   border-radius: 4px;
   padding: 10px 20px; /* 内边距 */
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); /* 阴影效果 */
@@ -108,13 +107,11 @@ export default defineComponent({
 
 .label {
   font-size: 14px; /* 标签字体大小 */
-  color: #909399; /* 标签颜色 */
   margin-bottom: 5px; /* label 和 value 之间的间距 */
 }
 
 .value {
   font-size: 20px; /* 数值字体大小 */
-  color: #333; /* 数值颜色 */
   font-weight: bold; /* 数值加粗 */
 }
 </style>
