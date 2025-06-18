@@ -107,3 +107,20 @@ document.forms[0].submit();
 #### [alipay-com.vue组件说明](src/components/Alibaba/OrderInfo/alipay-com.vue)
 
 `包含二维码的显示、订单的定时查询、支付结果事件等小功能, 以后如果也有这样需求的支付方式，可以微调后复用到别的项目里`
+
+
+### feat(monitor): 14.13 新增30天趋势图模块
+
+#### 先在菜单里面创建模块 - 30天趋势图
+
+![img.png](img/14-13.png)
+
+#### 创建文件
+
+展示页面 ruoyi-vue/src/views/monitor/report/index.vue
+
+API ruoyi-vue/src/api/monitor/report/index.ts
+
+实体与接口 ruoyi-vue/src/api/monitor/report/types.ts
+
+`按上面说的去做，就可以新建一个新的模块`
