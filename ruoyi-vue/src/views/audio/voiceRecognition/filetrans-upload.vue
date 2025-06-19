@@ -27,13 +27,13 @@
     <p>
       已选择文件：{{ fileName }}
       <span v-show="calAmount !== '0.00'">
-        ，金额：<b style="color: red; font-size: 18px">{{calAmount}}</b> &nbsp;元
+        ，金额：<b style="color: red; font-size: 18px">{{ calAmount }}</b> &nbsp;元
       </span>
     </p>
 
     <!-- 上传进度展示 -->
     <p>
-      <el-progress :percentage="uploadPercent" />
+      <el-progress :percentage="uploadPercent"/>
     </p>
 
     <!-- 语言选择 -->
@@ -53,17 +53,17 @@
     <p>
       支付方式：
       <el-radio-group v-model="channel">
-        <el-radio label="A">
-          <img src="/image/alipay.png" alt="支付宝" style="height: 150px;"/>
+        <el-radio value="A">
+          <img src="/image/alipay.png" alt="支付宝"/>
         </el-radio>
-        <el-radio label="W" disabled class="disabled-option">
-          <img src="/image/wechatpay.png" alt="微信" style="height: 150px; filter: grayscale(100%);"/>
+        <el-radio value="W" disabled class="disabled-option">
+          <img src="/image/wechatpay.png" alt="微信"/>
         </el-radio>
       </el-radio-group>
     </p>
 
     <!-- 支付宝支付组件 -->
-    <AlipayCom ref="alipayCom" @after-pay="handleAfterPay" />
+    <AlipayCom ref="alipayCom" @after-pay="handleAfterPay"/>
 
     <!-- 文件格式提示 -->
     <p>支持格式：.mp3, .wav, .m4a，最大500MB</p>
@@ -81,11 +81,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { ElNotification } from 'element-plus';
+import {ref, computed} from 'vue';
+import {ElNotification} from 'element-plus';
 import FiletransUploadCom from '@/components/Alibaba/Vod/filetrans-upload-com.vue';
-import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
-import { isEmpty } from 'radash';
+import {FileUploaderExpose} from '@/api/audio/voiceRecognition/types';
+import {isEmpty} from 'radash';
 import AlipayCom from '@/components/Alibaba/OrderInfo/alipay-com.vue';
 
 /**
@@ -177,7 +177,7 @@ const handleUploadSuccess = (fileUrl: string) => {
  * 上传失败处理
  * @param param0 错误对象 { code: number; message: string }
  */
-const handleUploadFailed = ({ code, message }: { code: number; message: string }) => {
+const handleUploadFailed = ({code, message}: { code: number; message: string }) => {
   ElNotification({
     title: `上传失败 (${code})`,
     message: message || '未知错误',
@@ -282,7 +282,7 @@ const handleCancel = () => {
 };
 
 // 暴露方法给父组件
-defineExpose({ showModal });
+defineExpose({showModal});
 </script>
 
 
@@ -293,6 +293,11 @@ defineExpose({ showModal });
 
 /* 缩小支付方式图片尺寸 */
 .el-radio-group img {
-  height: 100px !important; /* 缩小图片高度 */
+  height: auto !important; /* 移除固定高度 */
+  max-height: 80px; /* 设置最大高度约束 */
+}
+
+.disabled {
+  filter: grayscale(80%);
 }
 </style>
