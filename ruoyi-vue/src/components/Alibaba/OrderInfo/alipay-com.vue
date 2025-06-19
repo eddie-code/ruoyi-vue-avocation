@@ -1,33 +1,20 @@
 <template>
-  <a-modal
+  <el-dialog
     :title="payInfo.desc"
-    :visible="open"
-    :confirm-loading="modalLoading"
-    :afterClose="afterClose"
-    :closable="false"
-    style="top: 20px"
+    v-model="open"
     width="400px"
-    @cancel="handleCancel"
+    :before-close="handleCancel"
+    :close-on-click-modal="false"
+    :show-close="false"
+    custom-class="alipay-dialog"
+    top="20px"
   >
-    <template #footer>
-      <a-button key="back" @click="handleCancel" size="large">
-        <CloseOutlined />取消支付
-      </a-button>
-      <a-button key="submit" type="primary" :loading="modalLoading" @click="handleModalOk" size="large">
-        <CheckOutlined />我已支付
-      </a-button>
-    </template>
-
     <div class="pay-info">
       <div style="font-size: 25px; margin: 20px;">
         <img style="width: 35px" src="/image/alipay-icon.jpg"/>&nbsp;支付宝扫码支付
       </div>
 
       <div class="qrcode-wrapper">
-        <!-- 移除调试文本 -->
-        <!-- <div v-if="showIframe">showIframe: true</div>
-        <div v-else>showIframe: false</div> -->
-
         <iframe
           v-if="showIframe"
           :src="iframeSrc"
@@ -38,7 +25,9 @@
         ></iframe>
 
         <div v-if="loading" class="loading-text">
-          <a-spin size="large"/>
+          <el-icon class="is-loading" style="font-size: 24px;">
+            <Loading />
+          </el-icon>
           <div style="margin-top: 10px;">正在加载支付页面...</div>
         </div>
 
@@ -51,162 +40,159 @@
         打开手机支付宝，扫码支付<span style="color: red">{{payInfo.amount}}</span>元
       </div>
     </div>
-  </a-modal>
+
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button
+          @click="handleCancel"
+          size="large"
+          :icon="Close"
+        >
+          取消支付
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="modalLoading"
+          @click="handleModalOk"
+          size="large"
+          :icon="Check"
+        >
+          我已支付
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue'
-import { message, notification, Spin } from 'ant-design-vue'
-import { CloseOutlined, CheckOutlined } from '@ant-design/icons-vue'
+<script setup>
+import { ref } from 'vue'
+import { ElMessage, ElNotification } from 'element-plus'
+import { Close, Check, Loading } from '@element-plus/icons-vue'
 import { queryOrderStatusApi } from '@/api/audio/voiceRecognition/filetrans-upload'
 
-export default defineComponent({
-  components: {
-    CloseOutlined,
-    CheckOutlined,
-    'a-spin': Spin
-  },
-  emits: ['after-pay'],
-  setup(props, { emit }) {
-    const iframeSrc = ref('')
-    const showIframe = ref(false)
-    const loading = ref(false)
-    const error = ref(false)
-    const payInfo = ref({})
-    const open = ref(false)
-    const modalLoading = ref(false)
-    const orderNo = ref('')
-    let queryPayInterval = null
+const iframeSrc = ref('')
+const showIframe = ref(false)
+const loading = ref(false)
+const error = ref(false)
+const payInfo = ref({})
+const open = ref(false)
+const modalLoading = ref(false)
+const orderNo = ref('')
+let queryPayInterval = null
 
-    const handleOpen = async (info) => {
-      try {
-        loading.value = true
-        error.value = false
-        payInfo.value = info
-        open.value = true
-        orderNo.value = info.orderNo
-        showIframe.value = false
+const emit = defineEmits(['after-pay'])
 
-        console.log('Received QR code data:', info);
-        console.log('QR code HTML:', info.qrcode);
+const handleOpen = async (info) => {
+  try {
+    loading.value = true
+    error.value = false
+    payInfo.value = info
+    open.value = true
+    orderNo.value = info.orderNo
+    showIframe.value = false
 
-        // 创建临时div处理支付宝表单
-        const tempDiv = document.createElement('div')
-        tempDiv.style.display = 'none'
-        tempDiv.innerHTML = info.qrcode
-        document.body.appendChild(tempDiv)
+    // 创建临时div处理支付宝表单
+    const tempDiv = document.createElement('div')
+    tempDiv.style.display = 'none'
+    tempDiv.innerHTML = info.qrcode
+    document.body.appendChild(tempDiv)
 
-        const form = tempDiv.querySelector('form')
-        if (!form) {
-          throw new Error('无效的二维码格式')
-        }
-
-        form.setAttribute('target', 'alipay_qrcode_frame')
-
-        // 准备iframe内容 - 特别注意这里的脚本标签处理
-        iframeSrc.value = `data:text/html;charset=utf-8,${encodeURIComponent(info.qrcode)}`
-
-        console.log('iframeSrc:', iframeSrc.value);
-
-        showIframe.value = true
-        loading.value = false
-
-        // 手动触发表单提交
-        setTimeout(() => {
-          const iframe = document.querySelector('iframe[name="alipay_qrcode_frame"]');
-          if (iframe && iframe.contentDocument) {
-            const iframeForm = iframe.contentDocument.querySelector('form');
-            if (iframeForm) {
-              iframeForm.submit();
-            }
-          }
-        }, 500);
-
-        queryPayResult(info.orderNo)
-
-        // 清理临时元素
-        setTimeout(() => document.body.removeChild(tempDiv), 3000)
-      } catch (err) {
-        console.error('支付初始化失败:', err)
-        loading.value = false
-        error.value = true
-        message.error('支付初始化失败')
-      }
+    const form = tempDiv.querySelector('form')
+    if (!form) {
+      throw new Error('无效的二维码格式')
     }
 
-    const queryPayResult = (orderNo) => {
-      clearInterval(queryPayInterval)
-      queryPayInterval = setInterval(async () => {
-        try {
-          const res = await queryOrderStatusApi(orderNo)
-          if (res.code === 200) {
-            const status = res.data.status
-            if (status === 'S') {
-              clearInterval(queryPayInterval)
-              notification.success({
-                message: '支付成功',
-                description: '订单支付成功'
-              })
-              open.value = false
-              emit('after-pay', 'S')
-            } else if (status === 'F') {
-              clearInterval(queryPayInterval)
-              notification.error({
-                message: '支付失败',
-                description: '请重新尝试支付'
-              })
-              emit('after-pay', 'F')
-            }
-          }
-        } catch (err) {
-          console.error('查询支付状态失败:', err)
-        }
-      }, 2000)
-    }
+    form.setAttribute('target', 'alipay_qrcode_frame')
 
-    const onIframeLoad = () => {
-      console.log('iframe加载完成');
-      // 进一步调试信息
+    // 准备iframe内容
+    iframeSrc.value = `data:text/html;charset=utf-8,${encodeURIComponent(info.qrcode)}`
+
+    showIframe.value = true
+    loading.value = false
+
+    // 手动触发表单提交
+    setTimeout(() => {
       const iframe = document.querySelector('iframe[name="alipay_qrcode_frame"]');
       if (iframe && iframe.contentDocument) {
-        console.log('iframe content:', iframe.contentDocument.body.innerHTML);
+        const iframeForm = iframe.contentDocument.querySelector('form');
+        if (iframeForm) {
+          iframeForm.submit();
+        }
       }
-    }
+    }, 500);
 
-    const handleModalOk = () => {
-      modalLoading.value = true
-      queryOrderStatusApi(orderNo.value)
-        .finally(() => {
-          modalLoading.value = false
-        })
-    }
+    queryPayResult(info.orderNo)
 
-    const handleCancel = () => {
-      open.value = false
-      clearInterval(queryPayInterval)
-    }
-
-    const afterClose = () => {
-      clearInterval(queryPayInterval)
-      showIframe.value = false
-      iframeSrc.value = ''
-    }
-
-    return {
-      iframeSrc,
-      showIframe,
-      loading,
-      error,
-      payInfo,
-      open,
-      modalLoading,
-      handleOpen,
-      handleModalOk,
-      handleCancel,
-      afterClose,
-      onIframeLoad
-    }
+    // 清理临时元素
+    setTimeout(() => document.body.removeChild(tempDiv), 3000)
+  } catch (err) {
+    console.error('支付初始化失败:', err)
+    loading.value = false
+    error.value = true
+    ElMessage.error('支付初始化失败')
   }
+}
+
+const queryPayResult = (orderNo) => {
+  clearInterval(queryPayInterval)
+  queryPayInterval = setInterval(async () => {
+    try {
+      const res = await queryOrderStatusApi(orderNo)
+      if (res.code === 200) {
+        const status = res.data.status
+        if (status === 'S') {
+          clearInterval(queryPayInterval)
+          ElNotification({
+            title: '支付成功',
+            message: '订单支付成功',
+            type: 'success',
+            duration: 3000
+          })
+          open.value = false
+          emit('after-pay', 'S')
+        } else if (status === 'F') {
+          clearInterval(queryPayInterval)
+          ElNotification({
+            title: '支付失败',
+            message: '请重新尝试支付',
+            type: 'error',
+            duration: 3000
+          })
+          emit('after-pay', 'F')
+        }
+      }
+    } catch (err) {
+      console.error('查询支付状态失败:', err)
+    }
+  }, 2000)
+}
+
+const onIframeLoad = () => {
+  console.log('iframe加载完成');
+}
+
+const handleModalOk = () => {
+  modalLoading.value = true
+  queryOrderStatusApi(orderNo.value)
+    .finally(() => {
+      modalLoading.value = false
+    })
+}
+
+const handleCancel = () => {
+  open.value = false
+  clearInterval(queryPayInterval)
+}
+
+const afterClose = () => {
+  clearInterval(queryPayInterval)
+  showIframe.value = false
+  iframeSrc.value = ''
+}
+
+// 暴露方法给父组件
+defineExpose({
+  handleOpen
 })
 </script>
 
@@ -239,5 +225,15 @@ export default defineComponent({
 
 .error-text {
   color: #ff4d4f;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.alipay-dialog .el-dialog__body {
+  padding: 10px 20px;
 }
 </style>

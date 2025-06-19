@@ -126,6 +126,6 @@ API ruoyi-vue/src/api/monitor/report/index.ts
 `按上面说的去做，就可以新建一个新的模块`
 
 
-### 11111111
+### feat(monitor): 14.14 趋势图开发，Apache Echarts图表库使用
 
 [Apache ECharts 一个基于 JavaScript 的开源可视化图表库](https://echarts.apache.org/zh/index.html)

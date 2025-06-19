@@ -1,10 +1,16 @@
 <template>
-  <!-- 文件上传模态框 -->
-  <a-modal v-model:open="open" title="" @ok="pay" ok-text="结算" cancel-text="取消">
+  <!-- 文件上传模态框 - Element Plus 版本 -->
+  <el-dialog
+    v-model="open"
+    title="文件上传"
+    :before-close="handleCancel"
+    custom-class="file-upload-dialog"
+    width="500px"
+  >
     <!-- 文件选择触发按钮 -->
-    <a-button type="primary" size="large" @click="handleClick">
+    <el-button type="primary" size="large" @click="handleClick">
       <span>选择音频文件</span>
-    </a-button>
+    </el-button>
 
     <p></p>
 
@@ -27,24 +33,33 @@
 
     <!-- 上传进度展示 -->
     <p>
-      <a-progress :percent="uploadPercent" />
+      <el-progress :percentage="uploadPercent" />
     </p>
 
     <!-- 语言选择 -->
     <p>
       音频语言：
-      <a-select v-model:value="lang" style="width: 120px">
-        <a-select-option v-for="o in FILETRANS_LANG_ARRAY" :value="o.code">{{o.desc}}</a-select-option>
-      </a-select>
+      <el-select v-model="lang" style="width: 120px">
+        <el-option
+          v-for="o in FILETRANS_LANG_ARRAY"
+          :key="o.code"
+          :label="o.desc"
+          :value="o.code"
+        />
+      </el-select>
     </p>
 
     <!-- 支付方式选择 -->
     <p>
       支付方式：
-      <a-radio-group name="radioGroup" v-model:value="channel">
-        <a-radio value="A"><img src="/image/alipay.jpg" alt="支付宝" style="height: 50px;"/></a-radio>
-        <a-radio value="W"><img src="/image/wechatpay.jpg" alt="微信" style="height: 100px;"/></a-radio>
-      </a-radio-group>
+      <el-radio-group v-model="channel">
+        <el-radio label="A">
+          <img src="/image/alipay.png" alt="支付宝" style="height: 150px;"/>
+        </el-radio>
+        <el-radio label="W" disabled class="disabled-option">
+          <img src="/image/wechatpay.png" alt="微信" style="height: 150px; filter: grayscale(100%);"/>
+        </el-radio>
+      </el-radio-group>
     </p>
 
     <!-- 支付宝支付组件 -->
@@ -52,12 +67,22 @@
 
     <!-- 文件格式提示 -->
     <p>支持格式：.mp3, .wav, .m4a，最大500MB</p>
-  </a-modal>
+
+    <!-- 自定义底部按钮 -->
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleCancel">取消</el-button>
+        <el-button type="primary" @click="pay">
+          结算
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { notification } from 'ant-design-vue';
+import { ElNotification } from 'element-plus';
 import FiletransUploadCom from '@/components/Alibaba/Vod/filetrans-upload-com.vue';
 import { FileUploaderExpose } from '@/api/audio/voiceRecognition/types';
 import { isEmpty } from 'radash';
@@ -67,8 +92,8 @@ import AlipayCom from '@/components/Alibaba/OrderInfo/alipay-com.vue';
  * 响应式数据
  */
 const open = ref(false); // 模态框显示状态
-const channel = ref<string>('A'); // 支付方式，默认支付宝
-const lang = ref<string>(''); // 选择的语言
+const channel = ref('A'); // 支付方式，默认支付宝
+const lang = ref(''); // 选择的语言
 const calAmount = ref('0.00'); // 计算金额
 const fileUploader = ref<FileUploaderExpose>(); // 文件上传组件引用
 const alipayCom = ref<InstanceType<typeof AlipayCom>>(); // 支付宝组件引用
@@ -140,9 +165,11 @@ const handleAmountCalculated = (amount: string | number) => {
  */
 const handleUploadSuccess = (fileUrl: string) => {
   calAmount.value = '0.00';
-  notification.success({
-    message: '上传成功',
-    description: '文件已上传至：' + fileUrl
+  ElNotification({
+    title: '上传成功',
+    message: '文件已上传至：' + fileUrl,
+    type: 'success',
+    duration: 3000
   });
 };
 
@@ -151,9 +178,11 @@ const handleUploadSuccess = (fileUrl: string) => {
  * @param param0 错误对象 { code: number; message: string }
  */
 const handleUploadFailed = ({ code, message }: { code: number; message: string }) => {
-  notification.error({
-    message: `上传失败 (${code})`,
-    description: message || '未知错误'
+  ElNotification({
+    title: `上传失败 (${code})`,
+    message: message || '未知错误',
+    type: 'error',
+    duration: 5000
   });
 };
 
@@ -176,26 +205,27 @@ const handleTriggerAlipay = (payInfo: any) => {
  */
 const handleAfterPay = (status: string) => {
   if (status === 'S') {
-    notification['success']({
-      message: '支付宝支付提示',
-      description: "支付成功，感谢您的使用！",
+    ElNotification({
+      title: '支付宝支付提示',
+      message: "支付成功，感谢您的使用！",
+      type: 'success',
+      duration: 3000
     });
     open.value = false;
   } else {
-    notification['error']({
-      message: '支付宝支付失败',
-      description: "支付失败！请重新发起支付！",
+    ElNotification({
+      title: '支付宝支付失败',
+      message: "支付失败！请重新发起支付！",
+      type: 'error',
+      duration: 5000
     });
   }
 };
 
 /**
  * 结算按钮处理
- * @param e 鼠标事件
  */
-const pay = (e: MouseEvent) => {
-  console.log('处理模态框结算按钮', e);
-
+const pay = () => {
   // 同步语言和支付方式到上传组件
   if (fileUploader.value) {
     fileUploader.value.filetrans.lang = lang.value;
@@ -207,31 +237,35 @@ const pay = (e: MouseEvent) => {
     lang: lang.value
   };
 
-  console.log('准备结算：', JSON.stringify(mergedData));
-
   // 验证音频地址
   if (isEmpty(fileUploader.value?.filetrans?.audioAddr)) {
-    notification.error({
-      message: '系统提示',
-      description: "请先上传音频文件",
+    ElNotification({
+      title: '系统提示',
+      message: "请先上传音频文件",
+      type: 'error',
+      duration: 3000
     });
     return;
   }
 
   // 验证语言选择
   if (isEmpty(lang.value)) {
-    notification.error({
-      message: '系统提示',
-      description: "请选择音频语言",
+    ElNotification({
+      title: '系统提示',
+      message: "请选择音频语言",
+      type: 'error',
+      duration: 3000
     });
     return;
   }
 
   // 验证金额
   if (calAmount.value === '0.00' || calAmount.value === '0') {
-    notification.error({
-      message: '系统提示',
-      description: "金额不能为0",
+    ElNotification({
+      title: '系统提示',
+      message: "金额不能为0",
+      type: 'error',
+      duration: 3000
     });
     return;
   }
@@ -240,6 +274,25 @@ const pay = (e: MouseEvent) => {
   fileUploader.value?.handlePay();
 };
 
+/**
+ * 取消按钮处理
+ */
+const handleCancel = () => {
+  open.value = false;
+};
+
 // 暴露方法给父组件
 defineExpose({ showModal });
 </script>
+
+
+<style>
+.file-upload-dialog .el-dialog__body {
+  padding: 10px 15px; /* 缩小内边距 */
+}
+
+/* 缩小支付方式图片尺寸 */
+.el-radio-group img {
+  height: 100px !important; /* 缩小图片高度 */
+}
+</style>
