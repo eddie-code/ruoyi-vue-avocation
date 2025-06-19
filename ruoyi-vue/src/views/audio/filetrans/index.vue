@@ -6,10 +6,20 @@
                 :leave-active-class="proxy?.animate.searchAnimate.leave">
       <div v-show="showSearch" class="mb-[10px]">
         <el-card shadow="hover">
+
+          <el-alert title='温馨提示' type='warning'
+                    closable effect='light'
+                    show-icon close-text='关闭'
+                    description='为保障用户数据不泄露，用户上传的音频将在10天后系统自动删除。'
+                    style="margin-bottom: 16px;"
+          />
+
           <el-form ref="queryFormRef" :model="queryParams" :inline="true">
             <el-form-item>
               <!-- 操作按钮组 -->
-              <el-button v-hasPermi="['web:vod:get-upload-auth']" type="primary" icon="UploadFilled" @click="showModal">上传音频</el-button>
+              <el-button v-hasPermi="['web:vod:get-upload-auth']" type="primary" icon="UploadFilled" @click="showModal"
+                         style="margin-right: 12px">上传音频
+              </el-button>
               <FiletransUpload ref="filetransUploadView"></FiletransUpload>
               <FiletransSubtitle ref="filetransSubtitleCom"></FiletransSubtitle>
               <el-button icon="Refresh" @click="resetQuery">刷新列表</el-button>
@@ -56,8 +66,8 @@
         <!-- 保留的原注释代码 -->
         <!-- <el-table-column type="selection" width="55" align="center" /> -->
 
-        <el-table-column label="id" align="center" prop="id" v-if="false" />
-        <el-table-column label="文件名称" align="center" prop="name" />
+        <el-table-column label="id" align="center" prop="id" v-if="false"/>
+        <el-table-column label="文件名称" align="center" prop="name"/>
         <el-table-column label="支付状态" align="center" prop="payStatus">
           <template #default="scope">
             {{ payStatusMap[scope.row.payStatus] || scope.row.payStatus }}
@@ -92,7 +102,8 @@
 
             <!-- 字幕查看按钮（仅当状态为SS时显示） -->
             <el-tooltip v-if="scope.row.status === 'SS'" content="查看字幕" placement="top">
-              <el-button link v-hasPermi="['web:filetransSubtitle:list']" type="primary" icon="Document" @click="showSubtitleModal(scope.row)"></el-button>
+              <el-button link v-hasPermi="['web:filetransSubtitle:list']" type="primary" icon="Document"
+                         @click="showSubtitleModal(scope.row)"></el-button>
             </el-tooltip>
             <span v-else>-</span>
           </template>
@@ -103,7 +114,7 @@
       <pagination v-show="total > 0" :total="total"
                   v-model:page="queryParams.pageNum"
                   v-model:limit="queryParams.pageSize"
-                  @pagination="getList" />
+                  @pagination="getList"/>
     </el-card>
 
     <!-- 编辑对话框（保留但未使用） -->
@@ -129,13 +140,13 @@
 // import { listFiletrans, getFiletrans, delFiletrans, addFiletrans, updateFiletrans } from '@/api/audio/filetrans';
 
 // 导入必要的模块和组件
-import { listFiletrans } from '@/api/audio/filetrans';
-import { FiletransVO, FiletransQuery, FiletransForm } from '@/api/audio/filetrans/types';
+import {listFiletrans} from '@/api/audio/filetrans';
+import {FiletransVO, FiletransQuery, FiletransForm} from '@/api/audio/filetrans/types';
 import FiletransUpload from '../voiceRecognition/filetrans-upload.vue';
 import FiletransSubtitle from '@/components/Alibaba/Subtitle/filetrans-subtitle.con.vue';
 
 // 获取组件实例
-const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 
 /**
  * 响应式数据定义
@@ -191,8 +202,7 @@ const dialog = reactive<DialogOption>({
 });
 
 // 表单初始数据
-const initFormData: FiletransForm = {
-}
+const initFormData: FiletransForm = {}
 
 // 页面数据管理
 const data = reactive<PageData<FiletransForm, FiletransQuery>>({
@@ -200,15 +210,13 @@ const data = reactive<PageData<FiletransForm, FiletransQuery>>({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    params: {
-    }
+    params: {}
   },
-  rules: {
-  }
+  rules: {}
 });
 
 // 解构数据
-const { queryParams, form, rules } = toRefs(data);
+const {queryParams, form, rules} = toRefs(data);
 
 /**
  * 查询文件列表
