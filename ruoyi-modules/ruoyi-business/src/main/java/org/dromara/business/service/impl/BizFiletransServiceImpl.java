@@ -1,10 +1,12 @@
 package org.dromara.business.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
+import com.aliyuncs.vod.model.v20170321.SearchMediaResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -33,6 +35,7 @@ import org.dromara.common.vod.enums.FiletransPayStatusEnum;
 import org.dromara.common.vod.enums.FiletransStatusEnum;
 import org.dromara.common.vod.util.VodUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -200,6 +203,47 @@ public class BizFiletransServiceImpl implements IBizFiletransService {
         Page<BizFiletransVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
+
+    /**
+     * 删除过期的视频点播(VOD)文件。
+     * 该方法会删除创建时间在30天前到15天前范围内的媒体文件。
+     * 执行流程：
+     * 1. 计算时间范围：当前时间前30天作为起始时间，前15天作为结束时间
+     * 2. 调用VOD服务查询该时间范围内创建的媒体文件列表
+     * 3. 遍历查询结果并逐个删除媒体文件
+     * 4. 记录操作日志和异常信息
+     */
+    public void deleteVodJob() {
+        try {
+            // 计算查询时间范围：30天前至15天前
+            Date date = new Date();
+            Date start = DateUtil.offsetDay(date, -30);
+            String startStr = DateUtil.format(start, "yyyy-MM-dd") + "T00:00:00Z";
+            Date end = DateUtil.offsetDay(date, -15);
+            String endStr = DateUtil.format(end, "yyyy-MM-dd") + "T00:00:00Z";
+            log.info("删除过期VOD，查询列表日期范围：" + startStr + ", " + endStr);
+
+            // 查询指定时间范围内的媒体文件
+            SearchMediaResponse searchMediaResponse = VodUtil.searchByCreationTime(startStr, endStr);
+            List<SearchMediaResponse.Media> mediaList = searchMediaResponse.getMediaList();
+
+            // 批量删除媒体文件
+            if (!CollectionUtils.isEmpty(mediaList)) {
+                for (SearchMediaResponse.Media media : mediaList) {
+                    try {
+                        // 删除单个媒体文件
+                        VodUtil.deleteVideo(media.getMediaId());
+                    } catch (Exception e) {
+                        log.error("删除过期VOD异常：" + media.getMediaId(), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 捕获并记录整个任务执行过程中的异常
+            log.error("删除过期VOD异常", e);
+        }
+    }
+
 
     private LambdaQueryWrapper<BizFiletrans> buildQueryWrapper(BizFiletransBo bo) {
         LambdaQueryWrapper<BizFiletrans> lqw = Wrappers.lambdaQuery();

@@ -41,10 +41,14 @@ public interface IBizFiletransService {
     /**
      * 自定义分页查询
      *
-     * @param bo 文件传输的查询条件对象，包含了查询所需的业务参数
+     * @param bo        文件传输的查询条件对象，包含了查询所需的业务参数
      * @param pageQuery 分页查询对象，包含了分页所需的参数如页码、每页记录数等
      * @return 返回一个TableDataInfo对象，其中包含了查询结果列表以及分页信息
      */
     TableDataInfo<BizFiletransVo> queryPageList(BizFiletransQueryBo bo, PageQuery pageQuery);
 
+    /**
+     * 删除早期视频
+     */
+    void deleteVodJob();
 }

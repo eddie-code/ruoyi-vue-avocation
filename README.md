@@ -485,3 +485,112 @@ spring:
 视频点播服务这个系统bucket是私有，直接访问的话，得改成公共读
 
 ![img.png](img/img.png)
+
+## 15.2 删除过期的VOD视频，释放多余的空间
+
+### SnailJob 调度中心
+
+两种方式：
+1. 浏览器：http://localhost:8800/snail-job
+2. 登录本系统 -> 系统监控 -> 任务调度中心
+
+* 初始账号：admin
+* 初始密码：admin
+
+#### 1. 参考文档
+
+* [SnailJob 官方文档](https://snailjob.opensnail.com/docs/guide/job/job_executor.html)
+* [RuoYi-Plus 搭建SnailJob任务调度中心(5.2.0新功能)](https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/snail_job_init)
+
+#### 2. SnailJob配置说明
+
+ruoyi-admin\src\main\resources\application-dev.yml
+
+```yaml
+--- # snail-job 配置
+snail-job:
+  enabled: true
+  # 需要在 SnailJob 后台组管理创建对应名称的组,然后创建任务的时候选择对应的组,才能正确分派任务
+  group: "biz_group"
+  # SnailJob 接入验证令牌 详见 script/sql/ry_job.sql `sj_group_config` 表
+  token: "SJ_VqRxrYvNqLpc4P2bXh5cuVdbU3hLfNv8"
+  server:
+    host: 127.0.0.1
+    port: 17888
+  # 命名空间UUID 详见 script/sql/ry_job.sql `sj_namespace`表`unique_id`字段
+  namespace: ${spring.profiles.active}
+  # 随主应用端口漂移
+  port: 2${server.port}
+  # 客户端ip指定
+  host:
+  # RPC类型: netty, grpc
+  rpc-type: grpc
+```
+
+`group、token 的参数在SnailJob Web端获取`
+
+![SnailJob1.png](img/SnailJob1.png)
+
+ruoyi-extend\ruoyi-snailjob-server\src\main\resources\application-dev.yml
+
+```yaml
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.56.101:3306/ry-job?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
+    username: root
+    password: root
+    hikari:
+      connection-timeout: 30000
+      validation-timeout: 5000
+      minimum-idle: 10
+      maximum-pool-size: 20
+      idle-timeout: 600000
+      max-lifetime: 900000
+      keepaliveTime: 30000
+```
+
+`配置数据库, 对应 script/sql/ry_job.sql`
+
+#### 2. SnailJob主要在那个模块使用
+
+ruoyi-vue-avocation\ruoyi-modules\ruoyi-job\src\main\java\org\dromara\job\snailjob\DeleteVodJobExecutor
+
+```java
+@Slf4j
+@Component
+@JobExecutor(name = "deleteVodJobExecutor")
+public class DeleteVodJobExecutor {
+
+    @Resource
+    private IBizFiletransService filetransService;
+
+    public ExecuteResult jobExecute(JobArgs jobArgs) {
+//        SnailJobLog.LOCAL.info("deleteVodJobExecutor. jobArgs:{}", JsonUtil.toJsonString(jobArgs));
+//        SnailJobLog.REMOTE.info("deleteVodJobExecutor. jobArgs:{}", JsonUtil.toJsonString(jobArgs));
+        try {
+            // 增加日志流水号
+            MDC.put("LOG_ID", IdUtil.getSnowflakeNextIdStr());
+            log.info("删除VOD跑批开始");
+            long start = System.currentTimeMillis();
+            // 删除早期视频
+            filetransService.deleteVodJob();
+            log.info("删除VOD跑批结束，耗时：{}毫秒", System.currentTimeMillis() - start);
+            MDC.clear();
+        } catch (Exception e) {
+            log.error("删除VOD跑批异常", e);
+        }
+        return ExecuteResult.success("删除早期视频");
+    }
+}
+```
+
+```text
+引入需要执行的页面
+jobArgs 可以获取到Web页面传来的固定参数, 可以是json
+@JobExecutor(name = "deleteVodJobExecutor")  是执行器名称, 对应页面执行器名称输入, 是必填项
+```
+
+![SnailJob2.png](img/SnailJob2.png)
+
