@@ -54,7 +54,7 @@ export default defineComponent({
           { label: '订单数', value: data.orderCount || 0 },
           { label: '订单金额', value: formatAmount(data.orderAmount) || '0.00' },
           { label: '语音识别次数', value: data.filetransCount || 0 },
-          { label: '语音识别时长(秒)', value: data.filetransSecond || 0 },
+          { label: '语音识别时长', value: formatDuration(data.filetransSecond || 0) },
         ];
       } catch (err) {
         console.error('获取统计数据失败:', err);
@@ -62,6 +62,19 @@ export default defineComponent({
       } finally {
         loading.value = false;
       }
+    };
+
+    // 格式化语音识别时长
+    const formatDuration = (seconds) => {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+
+      return [
+        hours.toString().padStart(2, '0'),
+        minutes.toString().padStart(2, '0'),
+        secs.toString().padStart(2, '0')
+      ].join(':');
     };
 
     // 格式化金额
