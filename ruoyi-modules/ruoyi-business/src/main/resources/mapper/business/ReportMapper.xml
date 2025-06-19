@@ -40,10 +40,13 @@
     @result java.lang.Integer 返回今日状态为'S'的订单总数
     -->
     <select id="queryOrderCount" resultType="java.lang.Integer">
-        select count(1)
-        from order_info
-        where to_days(order_at) = to_days(now())
-          and status = 'S';
+        SELECT COALESCE
+               ( sum( amount ), 0 )
+        FROM
+            order_info
+        WHERE
+            order_at >= curdate()
+          AND STATUS = 'S'
     </select>
 
     <!--
@@ -54,7 +57,8 @@
     <select id="queryOrderAmount" resultType="java.math.BigDecimal">
         select COALESCE(sum(amount), 0)
         from order_info
-        where to_days(order_at) = to_days(now())
+        where
+            order_at >= curdate()
           and status = 'S'
     </select>
 
