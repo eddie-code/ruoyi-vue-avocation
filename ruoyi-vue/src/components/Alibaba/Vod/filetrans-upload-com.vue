@@ -12,11 +12,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { notification } from 'ant-design-vue';
-import { getCredentialsApi, calculateAmountApi, payApi } from '@/api/audio/voiceRecognition/filetrans-upload';
+import {ref} from 'vue';
+import {notification} from 'ant-design-vue';
+import {getCredentialsApi, calculateAmountApi, payApi} from '@/api/audio/voiceRecognition/filetrans-upload';
 import md5 from 'js-md5';
-import { PayForm } from '@/api/audio/voiceRecognition/types';
+import {PayForm} from '@/api/audio/voiceRecognition/types';
 
 // ======================== DOM引用 ========================
 /**
@@ -52,6 +52,7 @@ const filetrans = ref({
   audioAddr: "",
   fileSign: "",
   vod: "",
+  amount: 0.00,
   channel: "A" // 默认值, 支付宝
 });
 
@@ -92,7 +93,7 @@ const uploader = new AliyunUpload.Vod({
   // 上传失败回调
   onUploadFailed(uploadInfo, code, message) {
     console.log('上传失败:', uploadInfo.file.name, 'code:', code, 'message:', message);
-    emit('upload-failed', { code, message });
+    emit('upload-failed', {code, message});
   },
 
   // 上传进度回调
@@ -187,14 +188,19 @@ const calculateAmount = async (videoId: string) => {
  */
 const handlePay = () => {
   if (!filetrans.value.vod) {
-    notification.error({ message: '支付失败', description: '未获取到视频ID' });
+    notification.error({message: '支付失败', description: '未获取到视频ID'});
     return;
   }
+
+  // 优先使用 filetrans.value.amount，如果为空或0则使用 amount.value
+  const finalAmount = filetrans.value.amount && filetrans.value.amount > 0
+    ? filetrans.value.amount
+    : amount.value;
 
   const payData: PayForm = {
     name: filetrans.value.name,
     percent: filetrans.value.percent,
-    amount: amount.value,
+    amount: finalAmount,
     lang: filetrans.value.lang,
     audio: filetrans.value.audioAddr,
     fileSign: filetrans.value.fileSign,
@@ -262,6 +268,7 @@ const handleFileChange = () => {
     audioAddr: "",
     fileSign: "",
     vod: "",
+    amount: 0.00,
     channel: ""
   };
 
@@ -271,7 +278,7 @@ const handleFileChange = () => {
   filetrans.value.fileSign = fileKey;
 
   // 获取上传凭证
-  getCredentialsApi({ name: file.name, key: fileKey })
+  getCredentialsApi({name: file.name, key: fileKey})
     .then((response) => {
       if (response.code !== 200) throw new Error(response.msg);
 

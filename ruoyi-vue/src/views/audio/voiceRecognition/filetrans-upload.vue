@@ -8,9 +8,14 @@
     width="500px"
   >
     <!-- 文件选择触发按钮 -->
-    <el-button type="primary" size="large" @click="handleClick">
-      <span>选择音频文件</span>
-    </el-button>
+    <el-space>
+      <el-button type="primary" @click="handleClick">
+        <span>选择音频文件</span>
+      </el-button>
+      <el-button type="primary" @click="handleDemoClick" :loading="uploadLoading">
+        <span>没有音频? 使用示例音频</span>
+      </el-button>
+    </el-space>
 
     <p></p>
 
@@ -87,6 +92,8 @@ import FiletransUploadCom from '@/components/Alibaba/Vod/filetrans-upload-com.vu
 import {FileUploaderExpose} from '@/api/audio/voiceRecognition/types';
 import {isEmpty} from 'radash';
 import AlipayCom from '@/components/Alibaba/OrderInfo/alipay-com.vue';
+import {getDemoAudioApi} from '@/api/audio/voiceRecognition/filetrans-upload';
+import md5 from "js-md5";
 
 const emit = defineEmits(['after-pay']); // 支付后自动刷新
 
@@ -100,6 +107,7 @@ const calAmount = ref('0.00'); // 计算金额
 const fileUploader = ref<FileUploaderExpose>(); // 文件上传组件引用
 const alipayCom = ref<InstanceType<typeof AlipayCom>>(); // 支付宝组件引用
 const FILETRANS_LANG_ARRAY = ref(window.FILETRANS_LANG_ARRAY); // 语言选项数组
+const uploadLoading = ref(false); // 示例音频加载状态
 
 /**
  * 计算属性
@@ -108,6 +116,62 @@ const FILETRANS_LANG_ARRAY = ref(window.FILETRANS_LANG_ARRAY); // 语言选项�
 const fileName = computed(() => fileUploader.value?.filetrans?.name || '未选择文件');
 // 当前上传进度
 const uploadPercent = computed(() => fileUploader.value?.filetrans?.percent || 0);
+
+/**
+ * 示例音频按钮点击处理
+ */
+const handleDemoClick = async () => {
+  try {
+    uploadLoading.value = true;
+    const {data} = await getDemoAudioApi();
+    // 设置上传组件状态
+    if (fileUploader.value) {
+      fileUploader.value.filetrans = {
+        ...fileUploader.value.filetrans,
+        name: data.name,
+        audioAddr: data.audio,
+        vod: data.vid,
+        percent: 100,
+        channel: 'A',
+        duration: data.duration,
+        amount: Number(data.amount),
+        fileSign: data.key || md5(data.name),
+        lang: data.lang
+      };
+    }
+
+    console.log('示例音频按钮点击处理:', fileUploader.value.filetrans);
+
+    // 音频选择
+    lang.value = data.lang;
+
+    // 计算金额
+    // console.log('原始金额:', data.amount);
+    //handleAmountCalculated(data.amount);
+    // console.log('处理后:', {
+    //   original: data.amount,
+    //   displayed: calAmount.value
+    // });
+
+    calAmount.value = Number(data.amount).toFixed(2);
+
+    ElNotification({
+      title: '示例音频加载成功',
+      message: '已加载示例音频文件',
+      type: 'success',
+      duration: 2000
+    });
+  } catch (error) {
+    ElNotification({
+      title: '示例音频加载失败',
+      message: error.message || '加载示例音频失败',
+      type: 'error',
+      duration: 5000
+    });
+  } finally {
+    uploadLoading.value = false;
+  }
+};
 
 /**
  * 金额格式化方法
@@ -151,6 +215,7 @@ const handleClick = () => {
  * @param amount 金额数值或字符串
  */
 const handleAmountCalculated = (amount: string | number) => {
+  console.log("handleAmountCalculated === ", amount)
   try {
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
     calAmount.value = isNaN(numericAmount) || numericAmount === 0
@@ -207,7 +272,7 @@ const handleTriggerAlipay = (payInfo: any) => {
  * @param refresh 是否刷新列表
  */
 const handleAfterPay = (status: string, refresh: boolean = false) => {
-  console.log('filetrans-upload收到支付状态:', status, refresh)
+  // console.log('filetrans-upload收到支付状态:', status, refresh)
   if (status === 'S') {
     ElNotification({
       title: '支付宝支付提示',
@@ -233,11 +298,18 @@ const handleAfterPay = (status: string, refresh: boolean = false) => {
  * 结算按钮处理
  */
 const pay = () => {
+  // 验证金额
+  if (parseFloat(calAmount.value) < 0.01) {
+    ElNotification.error('金额不能低于0.01元');
+    return;
+  }
   // 同步语言和支付方式到上传组件
   if (fileUploader.value) {
     fileUploader.value.filetrans.lang = lang.value;
     fileUploader.value.filetrans.channel = channel.value;
   }
+
+  console.log("pay === ", fileUploader.value.filetrans);
 
   const mergedData = {
     ...fileUploader.value?.filetrans,

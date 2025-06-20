@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { FileTransUploadForm, PayForm } from '@/api/audio/voiceRecognition/types';
+import { FileTransUploadForm, PayForm, DemoAudioResponse } from '@/api/audio/voiceRecognition/types';
 
 /**
  * 调用后端接口获取上传凭证
@@ -45,6 +45,16 @@ export const payApi = (data: PayForm) => {
 export const queryOrderStatusApi = (orderNo: string) => {
   return request({
     url: `/web/order-info/query-order-status/${orderNo}`,
+    method: 'get'
+  });
+};
+
+/**
+ * 获取示例音频接口
+ */
+export const getDemoAudioApi = () => {
+  return request<DemoAudioResponse>({
+    url: '/web/vod/upload-demo',
     method: 'get'
   });
 };

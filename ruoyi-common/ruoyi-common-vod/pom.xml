@@ -38,6 +38,16 @@
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-vod</artifactId>
         </dependency>
+        <!-- aliyun-java-vod-upload-1.4.15.jar 是闭源包，Maven仓库没有的，只能手动引入 -->
+        <!-- 将aliyun-java-vod-upload-1.4.15.jar包拷贝到工程的resource目录下 -->
+        <!-- https://help.aliyun.com/zh/vod/developer-reference/upload-sdk-for-java?spm=5176.30275541.J_ZGek9Blx07Hclc3Ddt9dg.1.63492f3drdzOpa&scm=20140722.S_help@@%E6%96%87%E6%A1%A3@@53406._.ID_help@@%E6%96%87%E6%A1%A3@@53406-RL_aliyun~DAS~java~DAS~vod~DAS~uplo-LOC_2024SPHelpResult-OR_ser-PAR1_213e35f017504025261901264e0fe7-V_4-RE_new8-P0_0-P1_0 -->
+        <dependency>
+            <groupId>com.aliyun.vod</groupId>
+            <artifactId>upload</artifactId>
+            <version>${aliyun-java-vod-upload.version}</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/aliyun-java-vod-upload-1.4.15.jar</systemPath>
+        </dependency>
     </dependencies>
 
 </project>

@@ -3,6 +3,9 @@ package org.dromara.common.vod.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
+import com.aliyun.vod.upload.impl.UploadVideoImpl;
+import com.aliyun.vod.upload.req.UploadVideoRequest;
+import com.aliyun.vod.upload.resp.UploadVideoResponse;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.FormatType;
@@ -129,6 +132,85 @@ public class VodUtil {
         AppendObjectRequest request = new AppendObjectRequest(bucketName, objectName, file, meta);
         request.setPosition(0L);
         ossClient.appendObject(request);*/
+    }
+
+    /**
+     * 上传本地文件
+     */
+    public static UploadVideoResponse uploadLocalFile(String title, String fileFullPath) {
+        UploadVideoRequest request = new UploadVideoRequest(accessKeyId, accessKeySecret, title, fileFullPath);
+        /* 可指定分片上传时每个分片的大小，默认为2M字节 */
+        request.setPartSize(2 * 1024 * 1024L);
+        /* 可指定分片上传时的并发线程数，默认为1，（注：该配置会占用服务器CPU资源，需根据服务器情况指定）*/
+        request.setTaskNum(1);
+    /* 是否开启断点续传, 默认断点续传功能关闭。当网络不稳定或者程序崩溃时，再次发起相同上传请求，可以继续未完成的上传任务，适用于超时3000秒仍不能上传完成的大文件。
+    注意：断点续传开启后，会在上传过程中将上传位置写入本地磁盘文件，影响文件上传速度，请您根据实际情况选择是否开启*/
+        //request.setEnableCheckpoint(false);
+        /* OSS慢请求日志打印超时时间，是指每个分片上传时间超过该阈值时会打印debug日志，如果想屏蔽此日志，请调整该阈值。单位：毫秒，默认为300000毫秒*/
+        //request.setSlowRequestsThreshold(300000L);
+        /* 可指定每个分片慢请求时打印日志的时间阈值，默认为300s*/
+        //request.setSlowRequestsThreshold(300000L);
+        /* 是否显示水印（可选），指定模板组ID时，根据模板组配置确定是否显示水印*/
+        //request.setIsShowWaterMark(true);
+        /* 自定义消息回调设置及上传加速设置（可选）, Extend为自定义扩展设置，MessageCallback为消息回调设置，AccelerateConfig为上传加速设置（上传加速功能需要先申请开通后才能使用）*/
+        //request.setUserData("{\"Extend\":{\"test\":\"www\",\"localId\":\"xxxx\"},\"MessageCallback\":{\"CallbackType\":\"http\",\"CallbackURL\":\"http://example.aliyundoc.com\"},\"AccelerateConfig\":{\"Type\":\"oss\",\"Domain\":\"****Bucket.oss-accelerate.aliyuncs.com\"}}");
+        /* 视频分类ID（可选） */
+        //request.setCateId(0);
+        /* 视频标签，多个用逗号分隔（可选） */
+        //request.setTags("标签1,标签2");
+        /* 视频描述（可选）*/
+        //request.setDescription("视频描述");
+        /* 封面图片（可选）*/
+        //request.setCoverURL("http://cover.example.com/image_01.jpg");
+        /* 模板组ID（可选）*/
+        //request.setTemplateGroupId("8c4792cbc8694e7084fd5330e5****");
+        /* 工作流ID（可选）*/
+        //request.setWorkflowId("d4430d07361f0*be1339577859b0****");
+        /* 存储区域（可选）*/
+        //request.setStorageLocation("in-201703232118266-5sejd****.oss-cn-shanghai.aliyuncs.com");
+        /* 开启默认上传进度回调 */
+        //request.setPrintProgress(false);
+        /* 设置自定义上传进度回调（必须继承 VoDProgressListener）*/
+        /*默认关闭。如果开启了这个功能，上传过程中服务端会在日志中返回上传详情。如果不需要接收此消息，需关闭此功能*/
+        //request.setProgressListener(new PutObjectProgressListener());
+        /* 设置您实现的生成STS信息的接口实现类*/
+        // request.setVoDRefreshSTSTokenListener(new RefreshSTSTokenImpl());
+        /* 设置应用ID*/
+        //request.setAppId("app-100****");
+        /* 点播服务接入点 */
+        //request.setApiRegionId("cn-shanghai");
+        /* ECS部署区域*/
+        // request.setEcsRegionId("cn-shanghai");
+
+        /* 配置代理访问（可选） */
+        //OSSConfig ossConfig = new OSSConfig();
+        /* <必填>设置代理服务器主机地址 */
+        //ossConfig.setProxyHost("<yourProxyHost>");
+        /* <必填>设置代理服务器端口 */
+        //ossConfig.setProxyPort(-1);
+        /* 设置连接OSS所使用的协议（HTTP或HTTPS），默认为HTTP */
+        //ossConfig.setProtocol("HTTP");
+        /* 设置用户代理，指HTTP的User-Agent头，默认为aliyun-sdk-java */
+        //ossConfig.setUserAgent("<yourUserAgent>");
+        /* 设置代理服务器验证的用户名，https协议时需要填 */
+        //ossConfig.setProxyUsername("<yourProxyUserName>");
+        /* 设置代理服务器验证的密码，https协议时需要填 */
+        //ossConfig.setProxyPassword("<yourProxyPassword>");
+        //request.setOssConfig(ossConfig);
+
+        UploadVideoImpl uploader = new UploadVideoImpl();
+        UploadVideoResponse response = uploader.uploadVideo(request);
+        System.out.print("RequestId=" + response.getRequestId() + "\n");  //请求视频点播服务的请求ID
+        if (response.isSuccess()) {
+            System.out.print("VideoId=" + response.getVideoId() + "\n");
+        } else {
+            /* 如果设置回调URL无效，不影响视频上传，可以返回VideoId同时会返回错误码。其他情况上传失败时，VideoId为空，此时需要根据返回错误码分析具体错误原因 */
+            System.out.print("VideoId=" + response.getVideoId() + "\n");
+            System.out.print("ErrorCode=" + response.getCode() + "\n");
+            System.out.print("ErrorMessage=" + response.getMessage() + "\n");
+        }
+        return response;
+
     }
 
     /**
@@ -380,6 +462,15 @@ public class VodUtil {
             retries++;
         }
         throw new ServiceException("无法获取视频时长");
+    }
+
+    public static void main(String[] args) {
+        try {
+            Class.forName("com.aliyun.vod.upload.resp.UploadVideoResponse");
+            System.out.println("SDK 类加载成功");
+        } catch (ClassNotFoundException e) {
+            System.out.println("SDK 类加载失败: " + e.getMessage());
+        }
     }
 
 }

@@ -64,6 +64,14 @@ export interface FileItem {
    * 支付渠道
    */
   channel: string;
+  /**
+   * 金额
+   */
+  amount: string | number;
+  /**
+   * 视频时长
+   */
+  duration: string;
 }
 
 /**
@@ -89,6 +97,19 @@ export interface FileUploaderExpose {
    * 触发下单功能
    */
   handlePay: () => void;
+}
+
+/**
+ * 示例音频返回结果
+ */
+export interface DemoAudioResponse {
+  vid: string;
+  audio: string;
+  amount: string | number;
+  key: string;
+  name: string;
+  lang: string;
+  duration: string;
 }
 
 // 扩展事件类型声明

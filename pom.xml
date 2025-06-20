@@ -55,6 +55,7 @@
         <aliyun-java-sdk-core.version>4.5.1</aliyun-java-sdk-core.version>
         <aliyun-sdk-oss.version>3.10.2</aliyun-sdk-oss.version>
         <aliyun-java-sdk-vod.version>2.16.11</aliyun-java-sdk-vod.version>
+        <aliyun-java-vod-upload.version>1.4.15</aliyun-java-vod-upload.version>
 
         <!-- 支付宝支付 -->
         <alipay-easysdk.version>2.2.3</alipay-easysdk.version>
