@@ -8,6 +8,7 @@
     :show-close="false"
     custom-class="alipay-dialog"
     top="20px"
+    @closed="afterClose"
   >
     <div class="pay-info">
       <div style="font-size: 25px; margin: 20px;">
@@ -65,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Close, Check, Loading } from '@element-plus/icons-vue'
 import { queryOrderStatusApi } from '@/api/audio/voiceRecognition/filetrans-upload'
@@ -82,6 +83,14 @@ let queryPayInterval = null
 
 const emit = defineEmits(['after-pay'])
 
+// 清除定时任务
+const clearPaymentInterval = () => {
+  if (queryPayInterval) {
+    clearInterval(queryPayInterval)
+    queryPayInterval = null
+  }
+}
+
 const handleOpen = async (info) => {
   try {
     loading.value = true
@@ -90,6 +99,9 @@ const handleOpen = async (info) => {
     open.value = true
     orderNo.value = info.orderNo
     showIframe.value = false
+
+    // 清除之前的定时任务
+    clearPaymentInterval()
 
     // 创建临时div处理支付宝表单
     const tempDiv = document.createElement('div')
@@ -121,50 +133,53 @@ const handleOpen = async (info) => {
       }
     }, 500);
 
-    queryPayResult(info.orderNo)
-
-    // 清理临时元素
-    setTimeout(() => document.body.removeChild(tempDiv), 3000)
+    // 启动支付状态轮询
+    queryPayInterval = setInterval(async () => {
+      try {
+        const res = await queryOrderStatusApi(orderNo.value)
+        if (res.code === 200) {
+          const status = res.data.status
+          if (status === 'S') {
+            // 支付成功处理
+            ElNotification({
+              title: '支付成功',
+              message: '订单支付成功',
+              type: 'success',
+              duration: 3000
+            })
+            clearPaymentInterval()
+            open.value = false
+            emit('after-pay', 'S')
+          } else if (status === 'F') {
+            // 支付失败处理
+            ElNotification({
+              title: '支付失败',
+              message: '请重新尝试支付',
+              type: 'error',
+              duration: 3000
+            })
+            clearPaymentInterval()
+            emit('after-pay', 'F')
+          }
+        }
+      } catch (err) {
+        console.error('查询支付状态失败:', err)
+      }
+    }, 2000)
   } catch (err) {
     console.error('支付初始化失败:', err)
     loading.value = false
     error.value = true
     ElMessage.error('支付初始化失败')
-  }
-}
-
-const queryPayResult = (orderNo) => {
-  clearInterval(queryPayInterval)
-  queryPayInterval = setInterval(async () => {
-    try {
-      const res = await queryOrderStatusApi(orderNo)
-      if (res.code === 200) {
-        const status = res.data.status
-        if (status === 'S') {
-          clearInterval(queryPayInterval)
-          ElNotification({
-            title: '支付成功',
-            message: '订单支付成功',
-            type: 'success',
-            duration: 3000
-          })
-          open.value = false
-          emit('after-pay', 'S')
-        } else if (status === 'F') {
-          clearInterval(queryPayInterval)
-          ElNotification({
-            title: '支付失败',
-            message: '请重新尝试支付',
-            type: 'error',
-            duration: 3000
-          })
-          emit('after-pay', 'F')
-        }
+  } finally {
+    // 清理临时元素
+    setTimeout(() => {
+      const tempDiv = document.querySelector('div[style="display: none;"]')
+      if (tempDiv) {
+        document.body.removeChild(tempDiv)
       }
-    } catch (err) {
-      console.error('查询支付状态失败:', err)
-    }
-  }, 2000)
+    }, 3000)
+  }
 }
 
 const onIframeLoad = () => {
@@ -174,21 +189,57 @@ const onIframeLoad = () => {
 const handleModalOk = () => {
   modalLoading.value = true
   queryOrderStatusApi(orderNo.value)
+    .then(res => {
+      if (res.code === 200) {
+        const status = res.data.status
+        if (status === 'S') {
+          ElNotification({
+            title: '支付成功',
+            message: '订单支付成功',
+            type: 'success',
+            duration: 3000
+          })
+          clearPaymentInterval()
+          open.value = false
+          emit('after-pay', 'S')
+        } else if (status === 'F') {
+          ElNotification({
+            title: '支付失败',
+            message: '请重新尝试支付',
+            type: 'error',
+            duration: 3000
+          })
+        } else {
+          ElMessage.info('订单状态：' + (status === 'P' ? '处理中' : '未知状态'))
+        }
+      }
+    })
+    .catch(err => {
+      console.error('查询支付状态失败:', err)
+      ElMessage.error('查询支付状态失败')
+    })
     .finally(() => {
       modalLoading.value = false
     })
 }
 
+// 取消支付处理
 const handleCancel = () => {
+  clearPaymentInterval()
   open.value = false
-  clearInterval(queryPayInterval)
 }
 
+// 窗口关闭后清理
 const afterClose = () => {
-  clearInterval(queryPayInterval)
+  clearPaymentInterval()
   showIframe.value = false
   iframeSrc.value = ''
 }
+
+// 组件卸载时清理
+onUnmounted(() => {
+  clearPaymentInterval()
+})
 
 // 暴露方法给父组件
 defineExpose({
