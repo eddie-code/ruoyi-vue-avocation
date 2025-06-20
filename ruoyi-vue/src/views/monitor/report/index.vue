@@ -1,18 +1,45 @@
 <template>
   <div class="statistic-container">
-    <!-- 添加加载状态提示 -->
     <el-alert v-if="loading" type="info" title="数据加载中..." show-icon />
     <el-alert v-if="error" type="error" :title="error" show-icon />
 
-    <!-- 使用 div 和 Flexbox 布局 -->
-    <div class="statistic-row">
-      <div v-for="item in statisticData" :key="item.label" class="statistic-item">
-        <span class="label">{{ item.label }}</span>
-        <span class="value">{{ item.value }}</span>
-      </div>
-    </div>
+    <el-row :gutter="16" v-if="!loading && !error">
+      <el-col :span="4" v-for="item in statisticData" :key="item.label">
+        <div class="statistic-card">
+          <el-statistic :value="item.value">
+            <template #title>
+              <div style="display: inline-flex; align-items: center">
+                {{ item.label }}
+                <el-tooltip
+                  v-if="item.tooltip"
+                  effect="dark"
+                  :content="item.tooltip"
+                  placement="top"
+                >
+                  <el-icon style="margin-left: 4px" :size="12">
+                    <Warning />
+                  </el-icon>
+                </el-tooltip>
+              </div>
+            </template>
+          </el-statistic>
+          <div class="statistic-footer" v-if="item.showGrowth">
+            <div class="footer-item">
+              <span>较昨日</span>
+              <span :class="getGrowthRateClass(item.growthRate)">
+                {{ formatGrowthRate(item.growthRate, item.yesterdayValue) }}
+                <el-icon v-if="item.growthRate !== null">
+                  <CaretTop v-if="item.growthRate > 0" />
+                  <CaretBottom v-if="item.growthRate < 0" />
+                  <Minus v-if="item.growthRate === 0" />
+                </el-icon>
+              </span>
+            </div>
+          </div>
+        </div>
+      </el-col>
+    </el-row>
 
-    <!-- 新增的图表组件 -->
     <statistic-charts v-if="!loading && !error" :statisticData="statisticDataObj" />
   </div>
 </template>
@@ -20,18 +47,81 @@
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
 import { queryStatistic } from '@/api/monitor/report';
-import StatisticCharts from './statistic-charts.vue'; // 引入图表组件
+import StatisticCharts from './statistic-charts.vue';
+import { Warning, CaretTop, CaretBottom, Minus } from '@element-plus/icons-vue';
 
 export default defineComponent({
   name: 'StatisticIndex',
   components: {
-    StatisticCharts // 注册组件
+    StatisticCharts,
+    Warning,
+    CaretTop,
+    CaretBottom,
+    Minus
   },
   setup() {
     const statisticData = ref([]);
-    const statisticDataObj = ref({}); // 用于存储整个统计数据对象
+    const statisticDataObj = ref({});
     const loading = ref(true);
     const error = ref('');
+
+    // 获取昨天的日期字符串，格式为 "MM-DD"
+    const getYesterdayDate = () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 1);
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${month}-${day}`;
+    };
+
+    // 从列表中查找昨天的数据
+    const findYesterdayData = (list, currentValue) => {
+      const yesterdayDate = getYesterdayDate();
+      const yesterdayItem = list.find(item => item.date === yesterdayDate);
+
+      // 如果没有昨天的数据记录
+      if (!yesterdayItem) {
+        return { growthRate: null, yesterdayValue: null };
+      }
+
+      // 处理字符串类型的数字
+      const yesterdayValue = typeof yesterdayItem.num === 'string'
+        ? parseFloat(yesterdayItem.num)
+        : yesterdayItem.num;
+
+      const current = typeof currentValue === 'string'
+        ? parseFloat(currentValue)
+        : currentValue;
+
+      // 如果昨日数据为0
+      if (yesterdayValue === 0) {
+        // 当前也为0，显示无变化
+        if (current === 0) return { growthRate: 0, yesterdayValue: 0 };
+        // 当前不为0，显示新增
+        return { growthRate: 100, yesterdayValue: 0 };
+      }
+
+      // 正常计算增长率
+      return {
+        growthRate: ((current - yesterdayValue) / yesterdayValue) * 100,
+        yesterdayValue
+      };
+    };
+
+    // 格式化增长率显示
+    const formatGrowthRate = (rate, yesterdayValue) => {
+      if (rate === null) return '无数据';
+      if (yesterdayValue === 0 && rate === 100) return '新增';
+      if (rate === 0) return '无变化';
+      return `${rate > 0 ? '+' : ''}${rate.toFixed(2)}%`;
+    };
+
+    // 根据增长率返回样式类
+    const getGrowthRateClass = (rate) => {
+      if (rate === null) return '';
+      if (rate === 0) return 'gray';
+      return rate > 0 ? 'green' : 'red';
+    };
 
     const fetchStatistic = async () => {
       try {
@@ -39,22 +129,55 @@ export default defineComponent({
         error.value = '';
 
         const response = await queryStatistic();
-        console.log('API响应数据:', response); // 添加调试日志
+        console.log('API响应数据:', response);
 
-        // 确保数据结构正确
         const data = response.data || {};
-
-        // 存储整个数据对象，用于图表
         statisticDataObj.value = data;
 
-        // 更新顶部统计数据
         statisticData.value = [
-          { label: '在线人数', value: data.onlineCount || 0 },
-          { label: '注册人数', value: data.registerCount || 0 },
-          { label: '订单数', value: data.orderCount || 0 },
-          { label: '订单金额', value: formatAmount(data.orderAmount) || '0.00' },
-          { label: '语音识别次数', value: data.filetransCount || 0 },
-          { label: '语音识别时长', value: formatDuration(data.filetransSecond || 0) },
+          {
+            label: '在线人数',
+            value: data.onlineCount || 0,
+            growthRate: null,
+            yesterdayValue: null,
+            showGrowth: false,
+            tooltip: '当前在线用户数量'
+          },
+          {
+            label: '注册人数',
+            value: data.registerCount || 0,
+            ...findYesterdayData(data.registerCountList, data.registerCount),
+            showGrowth: true,
+            tooltip: '系统总注册用户数'
+          },
+          {
+            label: '订单数',
+            value: data.orderCount || 0,
+            ...findYesterdayData(data.orderCountList, data.orderCount),
+            showGrowth: true,
+            tooltip: '今日订单总数'
+          },
+          {
+            label: '订单金额',
+            value: formatAmount(data.orderAmount) || '0.00',
+            ...findYesterdayData(data.orderAmountList, data.orderAmount),
+            showGrowth: true,
+            tooltip: '今日订单总金额'
+          },
+          {
+            label: '语音识别次数',
+            value: data.filetransCount || 0,
+            ...findYesterdayData(data.filetransCountList, data.filetransCount),
+            showGrowth: true,
+            tooltip: '今日语音识别总次数'
+          },
+          {
+            label: '语音识别时长',
+            value: formatDuration(data.filetransSecond || 0),
+            ...findYesterdayData(data.filetransSecondList, data.filetransSecond),
+            showGrowth: true,
+            tooltip: '今日语音识别总时长'
+          },
         ];
       } catch (err) {
         console.error('获取统计数据失败:', err);
@@ -91,7 +214,9 @@ export default defineComponent({
       statisticData,
       statisticDataObj,
       loading,
-      error
+      error,
+      formatGrowthRate,
+      getGrowthRateClass
     };
   },
 });
@@ -102,29 +227,44 @@ export default defineComponent({
   padding: 20px;
 }
 
-.statistic-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* 平均分配每个统计项 */
+.statistic-card {
+  position: relative;
+  height: 100%;
+  padding: 20px;
   border-radius: 4px;
-  padding: 10px 20px; /* 内边距 */
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); /* 阴影效果 */
+  background-color: var(--el-bg-color-overlay);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
-.statistic-item {
+.statistic-footer {
   display: flex;
-  flex-direction: column; /* 使 label 和 value 垂直排列 */
-  align-items: center; /* 水平居中对齐 */
-  width: calc(100% / 6); /* 每个统计项占总宽度的1/6 */
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+  margin-top: 16px;
 }
 
-.label {
-  font-size: 14px; /* 标签字体大小 */
-  margin-bottom: 5px; /* label 和 value 之间的间距 */
+.statistic-footer .footer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.value {
-  font-size: 20px; /* 数值字体大小 */
-  font-weight: bold; /* 数值加粗 */
+.statistic-footer .footer-item span:last-child {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.green {
+  color: var(--el-color-success);
+}
+.red {
+  color: var(--el-color-error);
+}
+.gray {
+  color: var(--el-text-color-secondary);
 }
 </style>
