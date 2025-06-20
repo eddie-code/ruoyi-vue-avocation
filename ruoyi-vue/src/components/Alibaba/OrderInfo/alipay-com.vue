@@ -149,7 +149,7 @@ const handleOpen = async (info) => {
             })
             clearPaymentInterval()
             open.value = false
-            emit('after-pay', 'S')
+            emit('after-pay', 'S', true) // 添加第二个参数表示自动刷新
           } else if (status === 'F') {
             // 支付失败处理
             ElNotification({
@@ -159,7 +159,7 @@ const handleOpen = async (info) => {
               duration: 3000
             })
             clearPaymentInterval()
-            emit('after-pay', 'F')
+            emit('after-pay', 'F', false)
           }
         }
       } catch (err) {
@@ -201,7 +201,7 @@ const handleModalOk = () => {
           })
           clearPaymentInterval()
           open.value = false
-          emit('after-pay', 'S')
+          emit('after-pay', 'S', true) // 添加第二个参数表示自动刷新
         } else if (status === 'F') {
           ElNotification({
             title: '支付失败',

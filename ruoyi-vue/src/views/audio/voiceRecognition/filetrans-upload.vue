@@ -88,6 +88,8 @@ import {FileUploaderExpose} from '@/api/audio/voiceRecognition/types';
 import {isEmpty} from 'radash';
 import AlipayCom from '@/components/Alibaba/OrderInfo/alipay-com.vue';
 
+const emit = defineEmits(['after-pay']); // 支付后自动刷新
+
 /**
  * 响应式数据
  */
@@ -202,8 +204,10 @@ const handleTriggerAlipay = (payInfo: any) => {
 /**
  * 支付结果处理
  * @param status 支付状态
+ * @param refresh 是否刷新列表
  */
-const handleAfterPay = (status: string) => {
+const handleAfterPay = (status: string, refresh: boolean = false) => {
+  console.log('filetrans-upload收到支付状态:', status, refresh)
   if (status === 'S') {
     ElNotification({
       title: '支付宝支付提示',
@@ -211,7 +215,10 @@ const handleAfterPay = (status: string) => {
       type: 'success',
       duration: 3000
     });
-    open.value = false;
+    emit('after-pay', status, refresh); // 将事件传递给父组件
+    if (refresh) {
+      open.value = false; // 支付成功后关闭弹窗
+    }
   } else {
     ElNotification({
       title: '支付宝支付失败',
@@ -284,7 +291,6 @@ const handleCancel = () => {
 // 暴露方法给父组件
 defineExpose({showModal});
 </script>
-
 
 <style>
 .file-upload-dialog .el-dialog__body {

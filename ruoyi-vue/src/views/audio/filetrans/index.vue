@@ -20,18 +20,9 @@
               <el-button v-hasPermi="['web:vod:get-upload-auth']" type="primary" icon="UploadFilled" @click="showModal"
                          style="margin-right: 12px">上传音频
               </el-button>
-              <FiletransUpload ref="filetransUploadView"></FiletransUpload>
+              <FiletransUpload ref="filetransUploadView" @after-pay="handleAfterPay"></FiletransUpload>
               <FiletransSubtitle ref="filetransSubtitleCom"></FiletransSubtitle>
               <el-button icon="Refresh" @click="resetQuery">刷新列表</el-button>
-
-              <!-- 保留的原注释代码 -->
-              <!--
-              <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['audio:filetrans:add']">新增</el-button>
-              <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['audio:filetrans:edit']">修改</el-button>
-              <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['audio:filetrans:remove']">删除</el-button>
-              <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['audio:filetrans:export']">导出</el-button>
-              <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-              -->
             </el-form-item>
           </el-form>
         </el-card>
@@ -40,32 +31,8 @@
 
     <!-- 主内容区域 -->
     <el-card shadow="never">
-      <!-- 保留的原注释代码 -->
-      <!--
-      <template #header>
-        <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
-            <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['audio:filetrans:add']">新增</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['audio:filetrans:edit']">修改</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['audio:filetrans:remove']">删除</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['audio:filetrans:export']">导出</el-button>
-          </el-col>
-          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-        </el-row>
-      </template>
-      -->
-
       <!-- 文件列表表格 -->
       <el-table v-loading="loading" :data="filetransList" @selection-change="handleSelectionChange">
-        <!-- 保留的原注释代码 -->
-        <!-- <el-table-column type="selection" width="55" align="center" /> -->
-
         <el-table-column label="id" align="center" prop="id" v-if="false"/>
         <el-table-column label="文件名称" align="center" prop="name"/>
         <el-table-column label="支付状态" align="center" prop="payStatus">
@@ -90,16 +57,6 @@
         </el-table-column>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="scope">
-            <!-- 保留的原注释代码 -->
-            <!--
-            <el-tooltip content="修改" placement="top">
-              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['audio:filetrans:edit']"></el-button>
-            </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['audio:filetrans:remove']"></el-button>
-            </el-tooltip>
-            -->
-
             <!-- 字幕查看按钮（仅当状态为SS时显示） -->
             <el-tooltip v-if="scope.row.status === 'SS'" content="查看字幕" placement="top">
               <el-button link v-hasPermi="['web:filetransSubtitle:list']" type="primary" icon="Document"
@@ -121,25 +78,11 @@
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
       <el-form ref="filetransFormRef" :model="form" :rules="rules" label-width="80px">
       </el-form>
-
-      <!-- 保留的原注释代码 -->
-      <!--
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-      -->
     </el-dialog>
   </div>
 </template>
 
 <script setup name="Filetrans" lang="ts">
-// 保留的原注释代码
-// import { listFiletrans, getFiletrans, delFiletrans, addFiletrans, updateFiletrans } from '@/api/audio/filetrans';
-
-// 导入必要的模块和组件
 import {listFiletrans} from '@/api/audio/filetrans';
 import {FiletransVO, FiletransQuery, FiletransForm} from '@/api/audio/filetrans/types';
 import FiletransUpload from '../voiceRecognition/filetrans-upload.vue';
@@ -172,12 +115,12 @@ const filetransSubtitleCom = ref();
  * 显示上传模态框
  */
 const showModal = () => {
-  console.log('Button clicked'); // 调试信息
+  console.log('Button clicked');
   if (filetransUploadView.value) {
     filetransUploadView.value.showModal();
-    console.log('showModal 在 FiletransUpload 上调用'); // 调试信息
+    console.log('showModal 在 FiletransUpload 上调用');
   } else {
-    console.error('filetransUploadCom 未定义'); // 错误信息
+    console.error('filetransUploadCom 未定义');
   }
 };
 
@@ -189,7 +132,7 @@ const showSubtitleModal = (row: FiletransVO) => {
   console.log('查看字幕', row.id);
   if (filetransSubtitleCom.value) {
     filetransSubtitleCom.value.showModal(row);
-    console.log('showSubtitleModal 在 filetransSubtitleCom 上调用'); // 调试信息
+    console.log('showSubtitleModal 在 filetransSubtitleCom 上调用');
   } else {
     console.error('filetransSubtitleCom 未定义');
   }
@@ -271,49 +214,32 @@ const handleSelectionChange = (selection: FiletransVO[]) => {
   multiple.value = !selection.length;
 }
 
-// 保留的原注释代码
-// /** 新增按钮操作 */
-// const handleAdd = () => {
-//   reset();
-//   dialog.visible = true;
-//   dialog.title = "添加语音识别";
-// }
-//
-// /** 修改按钮操作 */
-// const handleUpdate = async (row?: FiletransVO) => {
-//   reset();
-//   const _id = row?.id || ids.value[0]
-//   const res = await getFiletrans(_id);
-//   Object.assign(form.value, res.data);
-//   dialog.visible = true;
-//   dialog.title = "修改语音识别";
-// }
-//
-// /** 提交按钮 */
-// const submitForm = () => {
-//   filetransFormRef.value?.validate(async (valid: boolean) => {
-//     if (valid) {
-//       buttonLoading.value = true;
-//       if (form.value.id) {
-//         await updateFiletrans(form.value).finally(() =>  buttonLoading.value = false);
-//       } else {
-//         await addFiletrans(form.value).finally(() =>  buttonLoading.value = false);
-//       }
-//       proxy?.$modal.msgSuccess("操作成功");
-//       dialog.visible = false;
-//       await getList();
-//     }
-//   });
-// }
-//
-// /** 删除按钮操作 */
-// const handleDelete = async (row?: FiletransVO) => {
-//   const _ids = row?.id || ids.value;
-//   await proxy?.$modal.confirm('是否确认删除语音识别编号为"' + _ids + '"的数据项？').finally(() => loading.value = false);
-//   await delFiletrans(_ids);
-//   proxy?.$modal.msgSuccess("删除成功");
-//   await getList();
-// }
+/**
+ * 支付结果处理
+ * @param status 支付状态
+ * @param refresh 是否刷新列表
+ */
+const handleAfterPay = (status: string, refresh: boolean = false) => {
+  if (status === 'S') {
+    ElNotification({
+      title: '支付宝支付提示',
+      message: "支付成功，感谢您的使用！",
+      type: 'success',
+      duration: 3000
+    });
+    if (refresh) {
+      console.log("支付后执行列表刷新...")
+      getList(); // 支付成功后刷新列表
+    }
+  } else {
+    ElNotification({
+      title: '支付宝支付失败',
+      message: "支付失败！请重新发起支付！",
+      type: 'error',
+      duration: 5000
+    });
+  }
+};
 
 /**
  * 导出操作
