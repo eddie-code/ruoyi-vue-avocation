@@ -309,7 +309,7 @@ const pay = () => {
     fileUploader.value.filetrans.channel = channel.value;
   }
 
-  console.log("pay === ", fileUploader.value.filetrans);
+  // console.log("pay === ", fileUploader.value.filetrans);
 
   const mergedData = {
     ...fileUploader.value?.filetrans,

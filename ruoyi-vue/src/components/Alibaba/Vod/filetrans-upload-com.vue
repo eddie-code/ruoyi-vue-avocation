@@ -86,7 +86,10 @@ const uploader = new AliyunUpload.Vod({
     const fileUrl = uploadInfo.endpoint.replace('https://', 'https://' + uploadInfo.bucket + '.') + '/' + uploadInfo.object;
     console.log('上传成功:', fileUrl);
     emit('upload-success', fileUrl);
-    calculateAmount(videoId); // 确保使用最新的videoId
+    // 使用立即执行异步函数
+    (async () => {
+      await calculateAmount(videoId, 1000);
+    })();
     filetrans.value.audioAddr = fileUrl;
   },
 
@@ -150,7 +153,8 @@ const resetFileTrans = () => {
     audioAddr: "",
     fileSign: "",
     vod: "",
-    channel: "A"
+    channel: "A",
+    amount: 0
   };
   if (fileUploadCom.value) {
     fileUploadCom.value.value = '';
@@ -161,26 +165,32 @@ const resetFileTrans = () => {
 /**
  * 金额计算接口
  * @param {string} videoId - 视频ID
+ * @param {number} delayMs - 延迟计算时间
  */
-const calculateAmount = async (videoId: string) => {
-  calculateAmountApi(videoId)
-    .then((response: any) => {
-      if (response.code === 200) {
-        console.log('金额接口返回:', response.data);
-        amount.value = response.data;
-        emit('amount-calculated', response.data);
-      } else {
-        throw new Error(response.msg || '金额计算失败');
+const calculateAmount = async (videoId: string, delayMs: number = 1000) => {
+  return new Promise<void>((resolve) => {
+    setTimeout(async () => {
+      try {
+        const response = await calculateAmountApi(videoId);
+        if (response.code === 200) {
+          console.log('金额接口返回:', response.data);
+          amount.value = response.data;
+          emit('amount-calculated', response.data);
+        } else {
+          throw new Error(response.msg || '金额计算失败');
+        }
+      } catch (error) {
+        console.error('请求或处理失败:', error);
+        notification.warning({
+          message: '费用计算失败',
+          description: error.message || '无法获取预估费用'
+        });
+        emit('amount-calculated', '0.00');
+      } finally {
+        resolve();
       }
-    })
-    .catch((error: any) => {
-      console.error('请求或处理失败:', error);
-      notification.warning({
-        message: '费用计算失败',
-        description: error.message || '无法获取预估费用'
-      });
-      emit('amount-calculated', '0.00');
-    });
+    }, delayMs);
+  });
 };
 
 /**
@@ -288,7 +298,10 @@ const handleFileChange = () => {
         filetrans.value.percent = 100;
         emit('upload-success', response.data.fileUrl);
         videoId = response.data.videoId;
-        calculateAmount(videoId);
+        // 使用立即执行异步函数
+        (async () => {
+          await calculateAmount(videoId, 1000);
+        })();
         filetrans.value.audioAddr = response.data.fileUrl;
         filetrans.value.vod = videoId;
         return;
@@ -300,7 +313,10 @@ const handleFileChange = () => {
       uploadAddress = response.data.uploadAddress;
       videoId = response.data.videoId;
       filetrans.value.vod = videoId;
-      calculateAmount(videoId);
+      // 使用立即执行异步函数
+      (async () => {
+        await calculateAmount(videoId, 1000);
+      })();
       uploader.addFile(file);
       uploader.startUpload();
     })
